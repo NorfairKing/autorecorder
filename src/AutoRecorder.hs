@@ -3,5 +3,11 @@ module AutoRecorder
   )
 where
 
+import AutoRecorder.Commands
+import AutoRecorder.OptParse
+
 autoRecorder :: IO ()
-autoRecorder = putStrLn "autoRecorder"
+autoRecorder = do
+  Instructions d Settings <- getInstructions
+  case d of
+    DispatchRecord rs -> record rs

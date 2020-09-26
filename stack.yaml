@@ -1,3 +1,14 @@
 resolver: lts-15.15
 packages:
 - .
+extra-deps:
+- github: NorfairKing/dirforest
+  commit: 8dba4d4a5be45c293a33480264e55d2cb8b71d3f
+  subdirs:
+    - dirforest
+- github: NorfairKing/yamlparse-applicative
+  commit: 1d381a4cbc9736a2defc916a93cfcf8000ee7e37
+  subdirs:
+    - yamlparse-applicative
+- normaldistribution-1.1.0.3@sha256:2615b784c4112cbf6ffa0e2b55b76790290a9b9dff18a05d8c89aa374b213477,2160
+- envparse-0.4.1@sha256:989902e6368532548f61de1fa245ad2b39176cddd8743b20071af519a709ce30,2842

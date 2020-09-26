@@ -1,15 +1,44 @@
-name:                autorecorder
-version:             0.0.0.0
-github:              "NorfairKing/autorecorder"
-author:              "Tom Sydney Kerckhove"
-maintainer:          "syd@cs-syd.eu"
-copyright:           "Copyright (c) 2020 Tom Sydney Kerckhove"
+name: autorecorder
+version: 0.0.0.0
+github: "NorfairKing/autorecorder"
+author: "Tom Sydney Kerckhove"
+maintainer: "syd@cs-syd.eu"
+copyright: "Copyright (c) 2020 Tom Sydney Kerckhove"
+license: MIT
+
+extra-source-files:
+- LICENSE
 
 dependencies:
 - base >= 4.7 && < 5
 
 library:
   source-dirs: src
+  c-sources:
+    - cbits/window_size.h
+    - cbits/window_size.c
+  dependencies:
+    - aeson
+    - async
+    - envparse
+    - optparse-applicative
+    - bytestring
+    - conduit
+    - containers
+    - directory
+    - dirforest
+    - normaldistribution
+    - path
+    - path-io
+    - random
+    - stm
+    - text
+    - time
+    - typed-process
+    - unix
+    - unliftio
+    - yaml
+    - yamlparse-applicative
 
 executables:
   autorecorder:

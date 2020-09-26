@@ -1,0 +1,6 @@
+- ignore:
+    name: "Use newtype instead of data"
+- ignore:
+    name: "Use String"
+- ignore:
+    name: "Use ++"
