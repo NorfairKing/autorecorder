@@ -20,6 +20,8 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB
 import Data.DirForest (DirForest)
 import qualified Data.DirForest as DF
+import Data.Map (Map)
+import qualified Data.Map as M
 import Data.Maybe
 import Data.Set (Set)
 import qualified Data.Set as S
@@ -51,6 +53,7 @@ data ASCIInemaSpec
         asciinemaTimeout :: Int, -- Seconds
         asciinemaFiles :: [FilePath],
         asciinemaWorkingDir :: Maybe FilePath,
+        asciinemaEnvironment :: Map String String,
         asciinemaInput :: [ASCIInemaCommand]
       }
   deriving (Show, Eq)
@@ -69,6 +72,7 @@ instance YamlSchema ASCIInemaSpec where
             optionalFieldWithDefault "files" [] "The files that are being touched. These will be brought back in order afterwards."
           ]
         <*> optionalField "working-dir" "The working directory directory"
+        <*> optionalFieldWithDefault "environment" M.empty "Variables to add to the environment"
         <*> optionalFieldWithDefault "input" [] "The inputs to send to the command"
 
 withRestoredFiles :: [FilePath] -> IO a -> IO a
@@ -129,7 +133,8 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
       env <- getEnvironment
       let env' =
             concat
-              [ env
+              [ env,
+                M.toList asciinemaEnvironment
               ]
       pc <- case asciinemaCommand of
         Nothing ->
