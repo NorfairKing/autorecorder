@@ -18,5 +18,6 @@ jobs:
       with:
         name: autorecorder
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+        extraPullNames: dirforest,yamlparse,validity
     - run: nix-build ci.nix
 
