@@ -8,7 +8,7 @@ with final.haskell.lib;
       disableLibraryProfiling (final.haskellPackages.callCabal2nix "autorecorder" (final.gitignoreSource ../autorecorder) {})
     )
   );
-  mkCastDerivation = final.callPackage ./cast.nix {};
+  mkCastDerivation = import ./cast.nix { pkgs = final; };
   exampleCasts =
     let
       specFiles = builtins.map (removeSuffix ".yaml")
@@ -22,7 +22,6 @@ with final.haskell.lib;
         );
     in
       genAttrs specFiles (file: final.mkCastDerivation { name = file; src = ../examples + "/${file}.yaml"; });
-  intrayNotification = import ./notification.nix { pkgs = final; };
   haskellPackages =
     previous.haskellPackages.override (
       old:

@@ -1,0 +1,6 @@
+packages:
+- tree
+working-dir: subdir
+input:
+- type: "tree\n"
+- wait: 2000

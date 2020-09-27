@@ -1,18 +1,13 @@
-{ stdenv
-, bash
-, yaml2json
-, writeText
-, gitignoreSource
-, autorecorder
+{ pkgs ? import <nixpkgs> {}
 }:
 let
   fromYaml = yaml:
     builtins.fromJSON (
       builtins.readFile (
-        stdenv.mkDerivation {
+        pkgs.stdenv.mkDerivation {
           name = "fromYAML";
           phases = [ "buildPhase" ];
-          buildPhase = "echo '${yaml}' | ${yaml2json}/bin/yaml2json > $out";
+          buildPhase = "echo '${yaml}' | ${pkgs.yaml2json}/bin/yaml2json > $out";
         }
       )
     );
@@ -23,14 +18,19 @@ let
       let
         yamlContents = fromYaml (builtins.readFile src);
       in
-        builtins.trace (yamlContents) stdenv.mkDerivation {
+        pkgs.stdenv.mkDerivation {
           inherit name;
+          buildInputs = map (pkg: pkgs."${pkg}") (yamlContents.packages or []);
           buildCommand =
             let
+              workingDirScript = pkgs.lib.optionalString (builtins.hasAttr "working-dir" yamlContents) ''
+                cp -r ${builtins.dirOf src + "/${yamlContents.working-dir}"} ${yamlContents.working-dir}
+              '';
+              # Note [Sanity]
               # This needs to be run on shell startup for backspace and enter to work
               # correctly but it cannot be run from a script beforehand because it
               # only works in (pseudo) terminals.
-              bashRC = writeText "bashrc" ''
+              bashRC = pkgs.writeText "bashrc" ''
                 stty sane
 
                 export PS1="\\$ "
@@ -42,15 +42,22 @@ let
                 # To make sure that the right colours are used.
                 export TERM=xterm-256color
 
-                # To make sure that backspace works, see above
-                export SHELL="${bash}/bin/bash --rcfile ${bashRC}"
+                # To make sure that backspace works, see Note [Sanity]
+                export SHELL="${pkgs.bash}/bin/bash --rcfile ${bashRC}"
 
                 # To make sure that programs like 'tree' show nice unicode characters
                 export LANG=C.utf8
                 export LC_ALL=C.utf8
 
+                cp ${src} in.yaml
+
+                # Set up the right working dir
+                ${workingDirScript}
+
+                ${pkgs.tree}/bin/tree
+
                 # Record the cast
-                ${autorecorder}/bin/autorecorder record ${src} "out.cast" \
+                ${pkgs.autorecorder}/bin/autorecorder record in.yaml "out.cast" \
                   --columns 80 \
                   --rows 25 \
                   --progress

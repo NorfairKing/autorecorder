@@ -1,6 +1,5 @@
+packages:
+- hello
 input:
-- type: "echo hello\n"
+- type: "hello\n"
 - wait: 2000
-- type: "# This is a comment\n"
-- wait: 2000
-
