@@ -1,6 +1,6 @@
 resolver: lts-15.15
 packages:
-- .
+- autorecorder
 extra-deps:
 - github: NorfairKing/dirforest
   commit: 8dba4d4a5be45c293a33480264e55d2cb8b71d3f

@@ -5,7 +5,7 @@ with final.haskell.lib;
 {
   autorecorder = generateOptparseApplicativeCompletion "autorecorder" (
     failOnAllWarnings (
-      disableLibraryProfiling (final.haskellPackages.callCabal2nix "autorecorder" (final.gitignoreSource ../.) {})
+      disableLibraryProfiling (final.haskellPackages.callCabal2nix "autorecorder" (final.gitignoreSource ../autorecorder) {})
     )
   );
   mkCastDerivation = final.callPackage ./cast.nix {};

@@ -1,3 +1,6 @@
 input:
 - type: "echo hello\n"
 - wait: 2000
+- type: "# This is a comment\n"
+- wait: 2000
+
