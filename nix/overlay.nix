@@ -1,4 +1,5 @@
 final: previous:
+with final.lib;
 with final.haskell.lib;
 
 {
@@ -7,6 +8,20 @@ with final.haskell.lib;
       disableLibraryProfiling (final.haskellPackages.callCabal2nix "autorecorder" (final.gitignoreSource ../.) {})
     )
   );
+  mkCastDerivation = final.callPackage ./cast.nix {};
+  exampleCasts =
+    let
+      specFiles = builtins.map (removeSuffix ".yaml")
+        (
+          builtins.attrNames
+            (
+              filterAttrs
+                (p: v: v == "regular" && hasSuffix ".yaml" p)
+                (builtins.readDir ../examples)
+            )
+        );
+    in
+      genAttrs specFiles (file: final.mkCastDerivation { name = file; src = ../examples + "/${file}.yaml"; });
   intrayNotification = import ./notification.nix { pkgs = final; };
   haskellPackages =
     previous.haskellPackages.override (

@@ -1,0 +1,3 @@
+input:
+- type: "echo hello\n"
+- wait: 2000
