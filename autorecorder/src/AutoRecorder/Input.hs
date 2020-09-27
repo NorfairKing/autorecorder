@@ -118,12 +118,13 @@ inputConduit speed mistakes attrs = awaitForever go
 
 -- | Add a delay multiplier based on what kind of character it is to make the typing feel more natural.
 charSpeed :: Char -> Double
-charSpeed ' ' = 1.25
-charSpeed '\b' = 3 -- It takes a while to notice a mistake
-charSpeed c
-  | c `elem` ['a' .. 'z'] = 0.75
-  | c `elem` ['A' .. 'Z'] = 1.5 -- Because you have to press 'shift'
-  | otherwise = 2 -- Special characters take even longer
+charSpeed = \case
+  ' ' -> 1.25
+  '\b' -> 3 -- It takes a while to notice a mistake
+  c
+    | c `elem` ['a' .. 'z'] -> 0.75
+    | c `elem` ['A' .. 'Z'] -> 1.5 -- Because you have to press 'shift'
+    | otherwise -> 2 -- Special characters take even longer
 
 waitMilliSeconds :: Double -> Word -> IO ()
 waitMilliSeconds speed delay = threadDelay $ round $ fromIntegral (delay * 1000) / speed

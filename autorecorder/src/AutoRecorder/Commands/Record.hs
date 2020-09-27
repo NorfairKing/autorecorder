@@ -20,14 +20,12 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB
 import Data.DirForest (DirForest)
 import qualified Data.DirForest as DF
-import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Maybe
 import Data.Set (Set)
 import qualified Data.Set as S
 import Data.Text (Text)
 import Data.Time
-import Data.Yaml
 import GHC.IO.Handle
 import Path
 import Path.IO
@@ -77,8 +75,6 @@ getFileStatus p = do
           dp <- resolveDir' p
           DirWithContents dp <$> DF.read dp (SB.readFile . fromAbsFile)
         else pure (DoesNotExist p)
-
--- maybe FileDoesNotExist FileWithContents <$> forgivingAbsence (SB.readFile (fromAbsFile p))
 
 restoreFiles :: Set FileStatus -> IO ()
 restoreFiles = mapM_ restoreFile . S.toList
