@@ -1,0 +1,7 @@
+packages:
+- autorecorder
+working-dir: .
+file: echo.cast
+input:
+- type: "autorecorder record echo.yaml echo.cast --progress\n"
+- wait: 10000
