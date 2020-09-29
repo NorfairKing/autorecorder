@@ -24,7 +24,7 @@ let
           buildCommand =
             let
               workingDirScript = pkgs.lib.optionalString (builtins.hasAttr "working-dir" yamlContents) ''
-                cp -r ${builtins.dirOf src + "/${yamlContents.working-dir}"} ${yamlContents.working-dir}
+                cp -r ${builtins.dirOf src + "/${yamlContents.working-dir}"}/. ${yamlContents.working-dir}/.
               '';
               # Note [Sanity]
               # This needs to be run on shell startup for backspace and enter to work
@@ -53,8 +53,6 @@ let
 
                 # Set up the right working dir
                 ${workingDirScript}
-
-                ${pkgs.tree}/bin/tree
 
                 # Record the cast
                 ${pkgs.autorecorder}/bin/autorecorder record in.yaml "out.cast" \
