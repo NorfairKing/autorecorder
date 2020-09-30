@@ -21,7 +21,7 @@ with final.haskell.lib;
             )
         );
     in
-      genAttrs specFiles (file: final.mkCastDerivation { name = file; src = ../examples + "/${file}.yaml"; });
+      listToAttrs (map (file: nameValuePair "${file}-cast" (final.mkCastDerivation { name = "${file}-cast"; src = ../examples + "/${file}.yaml"; })) specFiles);
   haskellPackages =
     previous.haskellPackages.override (
       old:

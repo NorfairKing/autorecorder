@@ -24,7 +24,6 @@ let
           buildCommand =
             let
               workingDirScript = pkgs.lib.optionalString (builtins.hasAttr "working-dir" yamlContents) ''
-                mkdir -p ${yamlContents.working-dir}/.
                 cp -r ${builtins.dirOf src + "/${yamlContents.working-dir}"}/. ${yamlContents.working-dir}/.
               '';
               # Note [Sanity]
@@ -50,10 +49,11 @@ let
                 export LANG=C.utf8
                 export LC_ALL=C.utf8
 
-                cp ${src} in.yaml
-
                 # Set up the right working dir
                 ${workingDirScript}
+                
+                # Get the cast file ready
+                cp ${src} in.yaml
 
                 # Record the cast
                 ${pkgs.autorecorder}/bin/autorecorder record in.yaml "out.cast" \

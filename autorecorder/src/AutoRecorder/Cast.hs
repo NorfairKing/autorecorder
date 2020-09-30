@@ -15,7 +15,6 @@ import qualified Data.Text.Encoding as TE
 import qualified Data.Text.Encoding.Error as TE
 import Data.Time
 import Data.Time.Clock.POSIX
-import Text.Printf
 
 data Cast = Cast {castHeader :: Header, castEvents :: [Event]}
   deriving (Show, Eq)

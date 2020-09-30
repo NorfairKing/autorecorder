@@ -6,6 +6,8 @@ Instead of having to manually type in the commands while `asciinema rec` is reco
 
 This is an example spec file that shows how to use `autorecorder` in a cast (very meta):
 
+[![asciicast](https://asciinema.org/a/362623.png)](https://asciinema.org/a/362623)
+
 ```
 packages:
 - autorecorder
