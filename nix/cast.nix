@@ -24,6 +24,7 @@ let
           buildCommand =
             let
               workingDirScript = pkgs.lib.optionalString (builtins.hasAttr "working-dir" yamlContents) ''
+                mkdir -p ${yamlContents.working-dir}
                 cp -r ${builtins.dirOf src + "/${yamlContents.working-dir}"}/. ${yamlContents.working-dir}/.
               '';
               # Note [Sanity]
