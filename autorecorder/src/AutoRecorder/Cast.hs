@@ -14,13 +14,15 @@ import Data.Text (Text)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text.Encoding.Error as TE
 import Data.Time
+import Data.Time.Clock.POSIX
+import Text.Printf
 
 data Cast = Cast {castHeader :: Header, castEvents :: [Event]}
   deriving (Show, Eq)
 
 renderCast :: Cast -> LB.ByteString
 renderCast Cast {..} =
-  LB8.unlines $ JSON.encode castHeader : map JSON.encode castEvents
+  LB8.intercalate "\n" $ JSON.encode castHeader : map JSON.encode castEvents
 
 parseCast :: LB.ByteString -> Either String Cast
 parseCast bs =
@@ -67,7 +69,7 @@ instance ToJSON Header where
             "width" .= headerWidth,
             "height" .= headerHeight
           ],
-          ["timestamp" .= formatTime defaultTimeLocale "%s" ts | ts <- maybeToList headerStartTimestamp],
+          ["timestamp" .= (round (utcTimeToPOSIXSeconds ts) :: Int) | ts <- maybeToList headerStartTimestamp],
           ["duration" .= d | d <- maybeToList headerDuration],
           ["idle_time_limit" .= itl | itl <- maybeToList headerIdleTimeLimit],
           ["command" .= c | c <- maybeToList headerCommand],
@@ -109,7 +111,11 @@ instance ToJSON Event where
     let (typ, dat) = case eventData of
           EventInput t -> ("i" :: Text, t)
           EventOutput t -> ("o", t)
-     in toJSON [toJSON eventTime, toJSON typ, toJSON dat]
+     in toJSON
+          [ toJSON eventTime,
+            toJSON typ,
+            toJSON dat
+          ]
 
 instance FromJSON Event where
   parseJSON v = do

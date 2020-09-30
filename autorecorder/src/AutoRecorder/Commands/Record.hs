@@ -20,8 +20,10 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB
 import Data.DirForest (DirForest)
 import qualified Data.DirForest as DF
+import Data.List
 import qualified Data.Map as M
 import Data.Maybe
+import Data.Ord
 import Data.Set (Set)
 import qualified Data.Set as S
 import Data.Text (Text)
@@ -145,20 +147,22 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
             Just (Right _) -> die "Should not happen: The outputter finished before the inputter"
             Just (Left inputEvents) -> do
               outputEvents <- readTVarIO outVar
-              pure $ completeCast rs spec recordSetSpeed start inputEvents outputEvents
+              pure $ completeCast rs spec env' recordSetSpeed start inputEvents outputEvents
 
-completeCast :: RecordSettings -> ASCIInemaSpec -> Speed -> UTCTime -> [(UTCTime, Text)] -> [(UTCTime, ByteString)] -> Cast
-completeCast RecordSettings {..} ASCIInemaSpec {..} speed start inputs outputs =
-  let castHeader =
+completeCast :: RecordSettings -> ASCIInemaSpec -> [(String, String)] -> Speed -> UTCTime -> [(UTCTime, Text)] -> [(UTCTime, ByteString)] -> Cast
+completeCast RecordSettings {..} ASCIInemaSpec {..} env speed start inputs outputs =
+  let castEvents = map (eventSpeedUp speed) $ interleaveEvents start inputs outputs
+      castHeader =
         Header
           { headerWidth = recordSetColumns,
             headerHeight = recordSetRows,
             headerStartTimestamp = Just start,
-            headerDuration = Nothing,
+            headerDuration = case sortOn Down $ map eventTime castEvents of
+              [] -> Nothing
+              (t : _) -> Just t,
             headerIdleTimeLimit = Nothing,
             headerCommand = asciinemaCommand,
             headerTitle = Nothing,
-            headerEnv = Nothing
+            headerEnv = Just $ M.filterWithKey (\k _ -> k == "TERM" || k == "SHELL") $ M.fromList env
           }
-      castEvents = map (eventSpeedUp speed) $ interleaveEvents start inputs outputs
    in Cast {..}
