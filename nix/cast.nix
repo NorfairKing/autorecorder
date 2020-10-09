@@ -40,10 +40,11 @@ let
               #  ./foo/bar/spec.yaml   | ../..       | /build/foo/bar   | /build/foo/bar  | /build/          | no    
               #  ./foo/bar/spec.yaml   | ../xyz      | /build/foo/xyz   | /build/bar      | /build/xyz       | no    
               #
-              workingDirScript = pkgs.lib.optionalString (builtins.hasAttr "working-dir" yamlContents) ''
-                mkdir -p ${yamlContents.working-dir}
-                cp -r ${builtins.dirOf src + "/${yamlContents.working-dir}"}/. ${yamlContents.working-dir}/.
+              makeWorkingDirScript = working-dir: ''
+                mkdir -p ${working-dir}
+                cp -r ${builtins.dirOf src + "/${working-dir}"}/. ${working-dir}/.
               '';
+              workingDirScript = pkgs.lib.optionalString (builtins.hasAttr "working-dir" yamlContents) (makeWorkingDirScript yamlContents.working-dir);
               # Note [Sanity]
               # This needs to be run on shell startup for backspace and enter to work
               # correctly but it cannot be run from a script beforehand because it
