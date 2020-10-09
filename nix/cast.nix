@@ -36,22 +36,33 @@ let
               #  ./foo/bar/spec.yaml   | .           | /build/          | /build/         | /build/          | yes   
               #  ./foo/bar/spec.yaml   | baz         | /build/baz       | /build/         | /build/baz       | yes   
               #  ./foo/bar/spec.yaml   | baz/quux    | /build/baz/quux  | /build/         | /build/baz/quux  | yes   
-              #  ./foo/bar/spec.yaml   | ..          | /build/bar       | /build/bar      | /build/          | no   
-              #  ./foo/bar/spec.yaml   | ../..       | /build/foo/bar   | /build/foo/bar  | /build/          | no    
+              #  ./foo/bar/spec.yaml   | ..          | /build/bar       | /build/bar      | /build/          | yes
+              #  ./foo/bar/spec.yaml   | ../..       | /build/foo/bar   | /build/foo/bar  | /build/          | yes
               #  ./foo/bar/spec.yaml   | ../xyz      | /build/foo/xyz   | /build/bar      | /build/xyz       | no    
               #
               calculateDirs = srcDir: dir:
-                if builtins.baseNameOf dir == ".."
+                if dir == "."
                 then {
-                  includeDirSource = "..";
+                  includeDirSource = ".";
                   includeDirDestination = ".";
                   cdDir = ".";
                 }
-                else {
-                  includeDirSource = dir;
-                  includeDirDestination = dir;
-                  cdDir = dir;
-                };
+                else
+                  let
+                    dirs = calculateDirs srcDir (builtins.dirOf dir);
+                    base = builtins.baseNameOf dir;
+                  in
+                    if base == ".."
+                    then {
+                      includeDirSource = dirs.includeDirSource + "/..";
+                      includeDirDestination = dirs.includeDirDestination + "/.";
+                      cdDir = dirs.cdDir;
+                    }
+                    else {
+                      includeDirSource = dirs.includeDirSource + "/${base}";
+                      includeDirDestination = dirs.includeDirSource + "/${base}";
+                      cdDir = dirs.cdDir + "/${base}";
+                    };
               makeWorkingDirScript = dir:
                 let
                   srcDir = builtins.dirOf src;

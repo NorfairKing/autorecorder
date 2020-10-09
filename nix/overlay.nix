@@ -37,6 +37,7 @@ with final.haskell.lib;
         "subsubdir-cast" = ../test-casts/subsubdir/spec.yaml;
         "subsubsubdir-cast" = ../test-casts/subsubsubdir/spec.yaml;
         "supdir-cast" = ../test-casts/supdir/subdir/spec.yaml;
+        "supsupdir-cast" = ../test-casts/supsupdir/subdir/subsubdir/spec.yaml;
       };
   haskellPackages =
     previous.haskellPackages.override (
