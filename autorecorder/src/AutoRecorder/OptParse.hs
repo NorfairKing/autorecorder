@@ -32,9 +32,11 @@ combineToInstructions (CommandRecord RecordFlags {..}) Flags Environment {..} _ 
   let recordSetSpeed = fromMaybe 1 recordFlagSpeed
   recordSetSpecFile <- resolveFile' recordFlagSpecFile
   recordSetOutputFile <- resolveFile' recordFlagOutputFile
-  (cols, rows) <- getWindowSize stdOutput
-  let recordSetRows = fromMaybe rows recordFlagRows
-  let recordSetColumns = fromMaybe cols recordFlagColumns
+  let recordSetRows = recordFlagRows
+  let recordSetColumns = recordFlagColumns
+  WindowSize {..} <- getWindowSize stdOutput
+  let recordSetDefaultRows = fromMaybe windowSizeRows recordFlagDefaultRows
+  let recordSetDefaultColumns = fromMaybe windowSizeColumns recordFlagDefaultColumns
   recordSetWorkingDir <- mapM resolveDir' recordFlagWorkingDir
   let recordSetMistakes = fromMaybe (MistakesWithProbability 0.03) recordFlagMistakeProbability
   let recordSetOutputView = fromMaybe DisplayOutputView recordFlagOutputView
@@ -101,8 +103,10 @@ parseCommandRecord = info parser modifier
                       ]
                   )
                 <*> parseSpeedFlag
-                <*> optional (option auto (mconcat [help "The number of columns", metavar "COLUMNS", long "columns"]))
-                <*> optional (option auto (mconcat [help "The number of rows", metavar "ROWS", long "rows"]))
+                <*> optional (option auto (mconcat [help "The number of rows. This overrides what is in the spec file or in the current terminal.", metavar "ROWS", long "rows"]))
+                <*> optional (option auto (mconcat [help "The number of columns. This overrides what is in the spec file or in the current terminal.", metavar "COLUMNS", long "columns"]))
+                <*> optional (option auto (mconcat [help "The default number of rows. This overrides what is in the current terminal but not what is in the spec file.", metavar "ROWS", long "default-rows"]))
+                <*> optional (option auto (mconcat [help "The default number of columns. This overrides what is in the current terminal but not what is in the spec file.", metavar "COLUMNS", long "default-columns"]))
                 <*> optional (strOption (mconcat [help "The working directory to record the cast in", metavar "DIRECTORY", long "working-dir"]))
                 <*> parseMistakesFlag
                 <*> parseOutputViewFlag

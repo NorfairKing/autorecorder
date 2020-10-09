@@ -3,6 +3,7 @@
 
 module AutoRecorder.Cast where
 
+import AutoRecorder.WindowSize
 import Data.Aeson as JSON
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB
@@ -35,8 +36,7 @@ parseCast bs =
 
 data Header
   = Header
-      { headerWidth :: Word,
-        headerHeight :: Word,
+      { headerWindowSize :: WindowSize,
         headerStartTimestamp :: Maybe UTCTime,
         headerDuration :: Maybe Double,
         headerIdleTimeLimit :: Maybe Double,
@@ -51,8 +51,10 @@ instance FromJSON Header where
   parseJSON =
     withObject "Header" $ \o ->
       Header
-        <$> o .: "width"
-        <*> o .: "height"
+        <$> ( WindowSize
+                <$> o .: "height"
+                <*> o .: "width"
+            )
         <*> ((fmap (show :: Int -> String) <$> o .:? "timestamp") >>= traverse (parseTimeM False defaultTimeLocale "%s"))
         <*> o .:? "duration"
         <*> o .:? "idle_time_limit"
@@ -63,18 +65,19 @@ instance FromJSON Header where
 instance ToJSON Header where
   toJSON Header {..} =
     object $
-      concat
-        [ [ "version" .= (2 :: Word),
-            "width" .= headerWidth,
-            "height" .= headerHeight
-          ],
-          ["timestamp" .= (round (utcTimeToPOSIXSeconds ts) :: Int) | ts <- maybeToList headerStartTimestamp],
-          ["duration" .= d | d <- maybeToList headerDuration],
-          ["idle_time_limit" .= itl | itl <- maybeToList headerIdleTimeLimit],
-          ["command" .= c | c <- maybeToList headerCommand],
-          ["title" .= t | t <- maybeToList headerTitle],
-          ["env" .= e | e <- maybeToList headerEnv]
-        ]
+      let WindowSize {..} = headerWindowSize
+       in concat
+            [ [ "version" .= (2 :: Word),
+                "height" .= windowSizeRows,
+                "width" .= windowSizeColumns
+              ],
+              ["timestamp" .= (round (utcTimeToPOSIXSeconds ts) :: Int) | ts <- maybeToList headerStartTimestamp],
+              ["duration" .= d | d <- maybeToList headerDuration],
+              ["idle_time_limit" .= itl | itl <- maybeToList headerIdleTimeLimit],
+              ["command" .= c | c <- maybeToList headerCommand],
+              ["title" .= t | t <- maybeToList headerTitle],
+              ["env" .= e | e <- maybeToList headerEnv]
+            ]
 
 -- -- Let's not mess with colours yet
 --

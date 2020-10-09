@@ -6,6 +6,7 @@ module AutoRecorder.Spec where
 import Data.List
 import Data.Map (Map)
 import qualified Data.Map as M
+import Data.Word
 import Data.Yaml
 import YamlParse.Applicative
 
@@ -14,6 +15,8 @@ data ASCIInemaSpec
       { asciinemaCommand :: Maybe String,
         asciinemaTimeout :: Int, -- Seconds
         asciinemaFiles :: [FilePath],
+        asciinemaRows :: Maybe Word16,
+        asciinemaColumns :: Maybe Word16,
         asciinemaWorkingDir :: Maybe FilePath,
         asciinemaEnvironment :: Map String String,
         asciinemaInput :: [ASCIInemaCommand]
@@ -33,6 +36,8 @@ instance YamlSchema ASCIInemaSpec where
           [ (: []) <$> requiredField "file" "The file that is being touched. It will be brought back in order afterwards.",
             optionalFieldWithDefault "files" [] "The files that are being touched. These will be brought back in order afterwards."
           ]
+        <*> optionalField "rows" "The number of rows (height) of the screen"
+        <*> optionalField "columns" "The number of columns (width) of the screen"
         <*> optionalField "working-dir" "The working directory directory"
         <*> optionalFieldWithDefault "environment" M.empty "Variables to add to the environment"
         <*> optionalFieldWithDefault "input" [] "The inputs to send to the command"

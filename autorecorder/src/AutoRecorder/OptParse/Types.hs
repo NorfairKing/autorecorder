@@ -5,6 +5,7 @@ module AutoRecorder.OptParse.Types where
 
 import AutoRecorder.Input
 import AutoRecorder.Output
+import Data.Word
 import Path
 
 data Arguments = Arguments Command Flags
@@ -18,8 +19,10 @@ data RecordFlags
       { recordFlagSpecFile :: FilePath,
         recordFlagOutputFile :: FilePath,
         recordFlagSpeed :: Maybe Double,
-        recordFlagColumns :: Maybe Word,
-        recordFlagRows :: Maybe Word,
+        recordFlagRows :: Maybe Word16,
+        recordFlagColumns :: Maybe Word16,
+        recordFlagDefaultRows :: Maybe Word16,
+        recordFlagDefaultColumns :: Maybe Word16,
         recordFlagWorkingDir :: Maybe FilePath,
         recordFlagMistakeProbability :: Maybe Mistakes,
         recordFlagOutputView :: Maybe OutputView
@@ -49,8 +52,10 @@ data RecordSettings
       { recordSetSpecFile :: Path Abs File,
         recordSetOutputFile :: Path Abs File,
         recordSetSpeed :: Double,
-        recordSetColumns :: Word,
-        recordSetRows :: Word,
+        recordSetRows :: Maybe Word16,
+        recordSetColumns :: Maybe Word16,
+        recordSetDefaultRows :: Word16,
+        recordSetDefaultColumns :: Word16,
         recordSetWorkingDir :: Maybe (Path Abs Dir),
         recordSetMistakes :: Mistakes,
         recordSetOutputView :: OutputView

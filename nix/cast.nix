@@ -78,8 +78,6 @@ let
                 # Record the cast
                 ${pkgs.autorecorder}/bin/autorecorder record "${src}" "$out" \
                   --working-dir "$(pwd)" \
-                  --columns 80 \
-                  --rows 25 \
                   --progress
               '';
 

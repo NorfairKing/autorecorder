@@ -126,7 +126,8 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
                 $ setStderr (useHandleClose tSlaveHandle) pc
         hSetBuffering tMasterHandle NoBuffering
         hSetBuffering tSlaveHandle NoBuffering
-        setWindowSize tFd (recordSetColumns, recordSetRows)
+        let windowSize = deriveWindowSize rs spec
+        setWindowSize tFd windowSize
         withProcessWait apc $ \p -> do
           start <- getCurrentTime
           outVar <- newTVarIO []
@@ -151,12 +152,11 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
               pure $ completeCast rs spec env' recordSetSpeed start inputEvents outputEvents
 
 completeCast :: RecordSettings -> ASCIInemaSpec -> [(String, String)] -> Speed -> UTCTime -> [(UTCTime, Text)] -> [(UTCTime, ByteString)] -> Cast
-completeCast RecordSettings {..} ASCIInemaSpec {..} env speed start inputs outputs =
+completeCast sets@RecordSettings {..} spec@ASCIInemaSpec {..} env speed start inputs outputs =
   let castEvents = map (eventSpeedUp speed) $ interleaveEvents start inputs outputs
       castHeader =
         Header
-          { headerWidth = recordSetColumns,
-            headerHeight = recordSetRows,
+          { headerWindowSize = deriveWindowSize sets spec,
             headerStartTimestamp = Just start,
             headerDuration = case sortOn Down $ map eventTime castEvents of
               [] -> Nothing
@@ -167,3 +167,9 @@ completeCast RecordSettings {..} ASCIInemaSpec {..} env speed start inputs outpu
             headerEnv = Just $ M.filterWithKey (\k _ -> k == "TERM" || k == "SHELL") $ M.fromList env
           }
    in Cast {..}
+
+deriveWindowSize :: RecordSettings -> ASCIInemaSpec -> WindowSize
+deriveWindowSize RecordSettings {..} ASCIInemaSpec {..} =
+  let windowSizeRows = fromMaybe recordSetDefaultRows $ recordSetRows <|> asciinemaRows
+      windowSizeColumns = fromMaybe recordSetDefaultColumns $ recordSetColumns <|> asciinemaColumns
+   in WindowSize {..}
