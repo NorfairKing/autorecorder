@@ -16,6 +16,7 @@ import Control.Applicative
 import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Exception
+import Control.Monad
 import qualified Data.ByteString as SB
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB
@@ -131,17 +132,20 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
         withProcessWait apc $ \p -> do
           start <- getCurrentTime
           outVar <- newTVarIO []
-          mExitedNormally <- timeout (asciinemaTimeout * 1000 * 1000) $ do
-            let commands =
-                  concat
-                    [ [Wait 500],
-                      asciinemaInput,
-                      [SendInput "exit\r" | isNothing asciinemaCommand],
-                      [Wait 500]
-                    ]
-            race -- For some reason the output conduit never finishes, so this works.
-              (runConduit $ inputWriter recordSetOutputView recordSetSpeed recordSetMistakes tAttributes tMasterHandle commands)
-              (runConduit $ outputConduit recordSetOutputView outVar tMasterHandle)
+          let commands =
+                concat
+                  [ [Wait 500],
+                    asciinemaInput,
+                    [SendInput "exit\r" | isNothing asciinemaCommand],
+                    [Wait 500]
+                  ]
+          let inSender = runConduit $ inputWriter recordSetOutputView recordSetSpeed recordSetMistakes tAttributes tMasterHandle commands
+          let outReader = runConduit $ outputConduit recordSetOutputView outVar tMasterHandle
+          mExitedNormally <-
+            timeout (asciinemaTimeout * 1000 * 1000) $
+              race -- For some reason the output conduit never finishes, so this works.
+                inSender
+                outReader
           case mExitedNormally of
             Nothing -> do
               stopProcess p
@@ -149,6 +153,16 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
             Just (Right _) -> die "Should not happen: The outputter finished before the inputter"
             Just (Left inputEvents) -> do
               outputEvents <- readTVarIO outVar
+              ec <- waitExitCode p
+              when (not asciinemaAllowFail && isNothing asciinemaExpectExitCode) $
+                case ec of
+                  ExitSuccess -> pure ()
+                  ExitFailure c -> die $ unwords ["The casted process has exited with exit code", show c]
+              forM_ asciinemaExpectExitCode $ \expected -> do
+                let actual = case ec of
+                      ExitSuccess -> 0
+                      ExitFailure i -> fromIntegral i
+                unless (actual == expected) $ die $ unwords ["The casted process has an unexpected exit code:", show actual]
               pure $ completeCast rs spec env' recordSetSpeed start inputEvents outputEvents
 
 completeCast :: RecordSettings -> ASCIInemaSpec -> [(String, String)] -> Speed -> UTCTime -> [(UTCTime, Text)] -> [(UTCTime, ByteString)] -> Cast

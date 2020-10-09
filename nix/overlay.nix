@@ -22,6 +22,16 @@ with final.haskell.lib;
         );
     in
       listToAttrs (map (file: nameValuePair "${file}-cast" (final.mkCastDerivation { name = "${file}-cast"; src = ../examples + "/${file}.yaml"; })) specFiles);
+  testCasts = {
+    "false" = final.mkCastDerivation {
+      name = "false-cast";
+      src = ../test-casts/false/spec.yaml;
+    };
+    "current-dir" = final.mkCastDerivation {
+      name = "current-dir-cast";
+      src = ../test-casts/current-dir/spec.yaml;
+    };
+  };
   haskellPackages =
     previous.haskellPackages.override (
       old:

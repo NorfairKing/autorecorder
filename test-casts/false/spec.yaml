@@ -1,0 +1,5 @@
+expect-exit-code: 1
+input:
+- type: "false\n"
+- wait: 100
+

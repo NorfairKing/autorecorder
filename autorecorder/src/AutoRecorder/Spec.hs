@@ -19,6 +19,8 @@ data ASCIInemaSpec
         asciinemaColumns :: Maybe Word16,
         asciinemaWorkingDir :: Maybe FilePath,
         asciinemaEnvironment :: Map String String,
+        asciinemaAllowFail :: Bool,
+        asciinemaExpectExitCode :: Maybe Word8,
         asciinemaInput :: [ASCIInemaCommand]
       }
   deriving (Show, Eq)
@@ -40,6 +42,8 @@ instance YamlSchema ASCIInemaSpec where
         <*> optionalField "columns" "The number of columns (width) of the screen"
         <*> optionalField "working-dir" "The working directory directory"
         <*> optionalFieldWithDefault "environment" M.empty "Variables to add to the environment"
+        <*> optionalFieldWithDefault "allow-fail" False "Whether to allow a nonzero exit code"
+        <*> optionalField "expect-exit-code" "The exit code to expect"
         <*> optionalFieldWithDefault "input" [] "The inputs to send to the command"
 
 data ASCIInemaCommand

@@ -4,4 +4,4 @@ in
 {
   inherit (pkgs) autorecorder;
   pre-commit-check = (import ./nix/pre-commit-hooks.nix).run;
-} // pkgs.exampleCasts
+} // pkgs.exampleCasts // pkgs.testCasts
