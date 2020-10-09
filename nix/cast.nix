@@ -40,12 +40,37 @@ let
               #  ./foo/bar/spec.yaml   | ../..       | /build/foo/bar   | /build/foo/bar  | /build/          | no    
               #  ./foo/bar/spec.yaml   | ../xyz      | /build/foo/xyz   | /build/bar      | /build/xyz       | no    
               #
-              makeWorkingDirScript = dir: ''
-                mkdir -p ${dir}
-                cp -r ${builtins.dirOf src + "/${dir}"}/. ${dir}/.
-                cd ${dir}
-              '';
-              workingDirScript = pkgs.lib.optionalString (builtins.hasAttr "working-dir" yamlContents) (makeWorkingDirScript yamlContents.working-dir);
+              calculateDirs = srcDir: dir:
+                if builtins.baseNameOf dir == ".."
+                then {
+                  includeDirSource = "..";
+                  includeDirDestination = ".";
+                  cdDir = ".";
+                }
+                else {
+                  includeDirSource = dir;
+                  includeDirDestination = dir;
+                  cdDir = dir;
+                };
+              makeWorkingDirScript = dir:
+                let
+                  srcDir = builtins.dirOf src;
+                  dirs = calculateDirs srcDir dir;
+                  dirToInclude = srcDir + "/${dirs.includeDirSource}";
+                in
+                  ''
+                    # set -x
+                    # echo dirToInclude ${dirToInclude}
+                    # echo cdDir ${dirs.cdDir}
+                    mkdir -p "$(dirname ${dirs.includeDirDestination})" # To make sure that the parent of the destination exists.
+                    ${pkgs.rsync}/bin/rsync -r ${dirToInclude}/ ${dirs.includeDirDestination}
+                    # ${pkgs.tree}/bin/tree
+                    cd ${dirs.cdDir}
+                    # set +x
+                  '';
+              workingDirScript = pkgs.lib.optionalString
+                (builtins.hasAttr "working-dir" yamlContents)
+                (makeWorkingDirScript yamlContents.working-dir);
               # Note [Sanity]
               # This needs to be run on shell startup for backspace and enter to work
               # correctly but it cannot be run from a script beforehand because it

@@ -1,4 +1,4 @@
-working-dir: subdir
+working-dir: ..
 input:
 - send: "ls test-file\n"
 - wait: 100
