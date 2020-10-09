@@ -12,6 +12,7 @@ import AutoRecorder.Spec
 import AutoRecorder.Terminal
 import AutoRecorder.WindowSize
 import Conduit
+import Control.Applicative
 import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Exception
@@ -94,7 +95,7 @@ restoreFile = \case
 runASCIInema :: RecordSettings -> Path Abs File -> ASCIInemaSpec -> IO Cast
 runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
   let parentDir = parent specFilePath
-  mWorkingDir <- mapM (resolveDir parentDir) asciinemaWorkingDir
+  mWorkingDir <- (recordSetWorkingDir <|>) <$> mapM (resolveDir parentDir) asciinemaWorkingDir
   let dirToResolveFiles = fromMaybe parentDir mWorkingDir
   withCurrentDir dirToResolveFiles
     $ withRestoredFiles asciinemaFiles

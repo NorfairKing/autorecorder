@@ -20,6 +20,7 @@ data RecordFlags
         recordFlagSpeed :: Maybe Double,
         recordFlagColumns :: Maybe Word,
         recordFlagRows :: Maybe Word,
+        recordFlagWorkingDir :: Maybe FilePath,
         recordFlagMistakeProbability :: Maybe Mistakes,
         recordFlagOutputView :: Maybe OutputView
       }
@@ -50,6 +51,7 @@ data RecordSettings
         recordSetSpeed :: Double,
         recordSetColumns :: Word,
         recordSetRows :: Word,
+        recordSetWorkingDir :: Maybe (Path Abs Dir),
         recordSetMistakes :: Mistakes,
         recordSetOutputView :: OutputView
       }

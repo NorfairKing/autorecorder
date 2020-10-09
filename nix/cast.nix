@@ -67,20 +67,20 @@ let
                 export LANG=C.utf8
                 export LC_ALL=C.utf8
 
+                # Set up a playground directory because otherwise there will be an envvar file
+                playground="casting-ground"
+                mkdir "$playground"
+                cd "$playground"
+
                 # Set up the right working dir
                 ${workingDirScript}
                 
-                # Get the cast file ready
-                cp ${src} in.yaml
-
                 # Record the cast
-                ${pkgs.autorecorder}/bin/autorecorder record in.yaml "out.cast" \
+                ${pkgs.autorecorder}/bin/autorecorder record "${src}" "$out" \
+                  --working-dir "$(pwd)" \
                   --columns 80 \
                   --rows 25 \
                   --progress
-
-                # Output the cast
-                cp "out.cast" $out
               '';
 
         };

@@ -35,6 +35,7 @@ combineToInstructions (CommandRecord RecordFlags {..}) Flags Environment {..} _ 
   (cols, rows) <- getWindowSize stdOutput
   let recordSetRows = fromMaybe rows recordFlagRows
   let recordSetColumns = fromMaybe cols recordFlagColumns
+  recordSetWorkingDir <- mapM resolveDir' recordFlagWorkingDir
   let recordSetMistakes = fromMaybe (MistakesWithProbability 0.03) recordFlagMistakeProbability
   let recordSetOutputView = fromMaybe DisplayOutputView recordFlagOutputView
   let d = DispatchRecord RecordSettings {..}
@@ -102,6 +103,7 @@ parseCommandRecord = info parser modifier
                 <*> parseSpeedFlag
                 <*> optional (option auto (mconcat [help "The number of columns", metavar "COLUMNS", long "columns"]))
                 <*> optional (option auto (mconcat [help "The number of rows", metavar "ROWS", long "rows"]))
+                <*> optional (strOption (mconcat [help "The working directory to record the cast in", metavar "DIRECTORY", long "working-dir"]))
                 <*> parseMistakesFlag
                 <*> parseOutputViewFlag
             )
