@@ -40,9 +40,10 @@ let
               #  ./foo/bar/spec.yaml   | ../..       | /build/foo/bar   | /build/foo/bar  | /build/          | no    
               #  ./foo/bar/spec.yaml   | ../xyz      | /build/foo/xyz   | /build/bar      | /build/xyz       | no    
               #
-              makeWorkingDirScript = working-dir: ''
-                mkdir -p ${working-dir}
-                cp -r ${builtins.dirOf src + "/${working-dir}"}/. ${working-dir}/.
+              makeWorkingDirScript = dir: ''
+                mkdir -p ${dir}
+                cp -r ${builtins.dirOf src + "/${dir}"}/. ${dir}/.
+                cd ${dir}
               '';
               workingDirScript = pkgs.lib.optionalString (builtins.hasAttr "working-dir" yamlContents) (makeWorkingDirScript yamlContents.working-dir);
               # Note [Sanity]

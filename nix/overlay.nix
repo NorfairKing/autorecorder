@@ -22,16 +22,19 @@ with final.haskell.lib;
         );
     in
       listToAttrs (map (file: nameValuePair "${file}-cast" (final.mkCastDerivation { name = "${file}-cast"; src = ../examples + "/${file}.yaml"; })) specFiles);
-  testCasts = {
-    "false" = final.mkCastDerivation {
-      name = "false-cast";
-      src = ../test-casts/false/spec.yaml;
-    };
-    "current-dir" = final.mkCastDerivation {
-      name = "current-dir-cast";
-      src = ../test-casts/current-dir/spec.yaml;
-    };
-  };
+  testCasts =
+    let
+      mkTest = name: path:
+        final.mkCastDerivation {
+          inherit name;
+          src = path;
+        };
+    in
+      mapAttrs mkTest {
+        "false-cast" = ../test-casts/false/spec.yaml;
+        "current-dir-cast" = ../test-casts/current-dir/spec.yaml;
+        "subdir-cast" = ../test-casts/subdir/spec.yaml;
+      };
   haskellPackages =
     previous.haskellPackages.override (
       old:
