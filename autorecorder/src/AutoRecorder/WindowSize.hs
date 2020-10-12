@@ -4,9 +4,8 @@
 
 module AutoRecorder.WindowSize where
 
-import Data.Bits (shiftL)
 import Data.Word
-import Foreign.C.Types (CInt (..), CLong (..))
+import Foreign.C.Types (CInt (..), CLong (..), CShort (..))
 import System.Posix.Types (Fd (..))
 
 data WindowSize
@@ -25,9 +24,7 @@ getWindowSize fd = do
   let windowSizeColumns = fromIntegral b
   return WindowSize {..}
 
-foreign import ccall "window_size.h c_set_window_size" c_setWindowSize :: Fd -> CLong -> IO ()
+foreign import ccall "window_size.h c_set_window_size" c_setWindowSize :: Fd -> CShort -> CShort -> IO ()
 
 setWindowSize :: Fd -> WindowSize -> IO ()
-setWindowSize fd WindowSize {..} = do
-  let val = (fromIntegral windowSizeRows `shiftL` 16) + fromIntegral windowSizeColumns :: Word
-  c_setWindowSize fd $ fromIntegral val
+setWindowSize fd WindowSize {..} = c_setWindowSize fd (fromIntegral windowSizeRows) (fromIntegral windowSizeColumns)
