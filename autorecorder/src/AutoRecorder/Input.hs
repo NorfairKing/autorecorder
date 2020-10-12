@@ -18,6 +18,7 @@ import Data.Text (Text)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text.IO as T
 import Data.Time
+import Path
 import System.IO
 import System.Posix.Terminal
 import System.Random
@@ -30,11 +31,11 @@ data Mistakes
   | MistakesWithProbability Double
   deriving (Show, Eq)
 
-inputWriter :: MonadIO m => OutputView -> Speed -> Mistakes -> TerminalAttributes -> Handle -> [ASCIInemaCommand] -> ConduitT () void m [(UTCTime, Text)]
-inputWriter ov speed mistakes attrs handle commands =
+inputWriter :: MonadIO m => Path Abs File -> OutputView -> Speed -> Mistakes -> TerminalAttributes -> Handle -> [ASCIInemaCommand] -> ConduitT () void m [(UTCTime, Text)]
+inputWriter specFile ov speed mistakes attrs handle commands =
   ( \ic -> case ov of
       DebugOutputView -> sourceList commands .| ic .| inputDebugConduit
-      ProgressOutputView -> inputListProgressConduit commands .| ic
+      ProgressOutputView -> inputListProgressConduit specFile commands .| ic
       _ -> sourceList commands .| ic
   )
     (inputConduit speed mistakes attrs)
@@ -57,15 +58,15 @@ inputDebugConduit = C.mapM $ \t -> do
   liftIO $ T.putStrLn $ "Sending input: " <> T.pack (show t)
   pure t
 
-inputListProgressConduit :: MonadIO m => [ASCIInemaCommand] -> ConduitT i ASCIInemaCommand m ()
-inputListProgressConduit as = foldM_ go 0 as
+inputListProgressConduit :: MonadIO m => Path Abs File -> [ASCIInemaCommand] -> ConduitT i ASCIInemaCommand m ()
+inputListProgressConduit specFile as = foldM_ go 0 as
   where
     totalDelay = sum $ map commandDelay as
     adjust = (`div` 100)
     lenStrLen = length (show (adjust totalDelay))
     showIntWithLen :: Word -> String
     showIntWithLen w = printf ("%" <> show lenStrLen <> "d") (adjust w)
-    progressStr i = concat ["Progress: [", showIntWithLen i, "/", showIntWithLen totalDelay, "]"]
+    progressStr i = concat ["Casting ", fromAbsFile specFile, ": [", showIntWithLen i, "/", showIntWithLen totalDelay, "]"]
     go :: MonadIO m => Word -> ASCIInemaCommand -> ConduitT i ASCIInemaCommand m Word
     go currentTiming c = do
       yield c

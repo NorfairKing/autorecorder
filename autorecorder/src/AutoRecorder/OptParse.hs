@@ -35,7 +35,7 @@ combineToInstructions (CommandRecord RecordFlags {..}) Flags Environment {..} _ 
   let recordSetDefaultRows = fromMaybe 25 recordFlagDefaultRows
   let recordSetDefaultColumns = fromMaybe 80 recordFlagDefaultColumns
   recordSetWorkingDir <- mapM resolveDir' recordFlagWorkingDir
-  let recordSetMistakes = fromMaybe (MistakesWithProbability 0.03) recordFlagMistakeProbability
+  let recordSetMistakes = fromMaybe (MistakesWithProbability 0.02) recordFlagMistakeProbability
   let recordSetOutputView = fromMaybe DisplayOutputView recordFlagOutputView
   let recordSetCleanup = fromMaybe True recordFlagCleanup
   let d = DispatchRecord RecordSettings {..}

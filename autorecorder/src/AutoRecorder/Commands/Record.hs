@@ -36,6 +36,7 @@ import Path.IO
 import qualified System.Directory as FP
 import System.Environment (getEnvironment)
 import System.Exit
+import System.IO
 import System.Process.Typed
 import System.Timeout
 import YamlParse.Applicative
@@ -125,6 +126,8 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
                 $ setStdin (useHandleClose tSlaveHandle)
                 $ setStdout (useHandleClose tSlaveHandle)
                 $ setStderr (useHandleClose tSlaveHandle) pc
+        hSetBuffering stdout LineBuffering -- For progress output
+        hSetBuffering stderr LineBuffering
         hSetBuffering tMasterHandle NoBuffering
         hSetBuffering tSlaveHandle NoBuffering
         let windowSize = deriveWindowSize rs spec
@@ -139,7 +142,7 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
                     [SendInput "exit\r" | isNothing asciinemaCommand],
                     [Wait 500]
                   ]
-          let inSender = runConduit $ inputWriter recordSetOutputView recordSetSpeed recordSetMistakes tAttributes tMasterHandle commands
+          let inSender = runConduit $ inputWriter specFilePath recordSetOutputView recordSetSpeed recordSetMistakes tAttributes tMasterHandle commands
           let outReader = runConduit $ outputConduit recordSetOutputView outVar tMasterHandle
           mExitedNormally <-
             timeout (asciinemaTimeout * 1000 * 1000) $
