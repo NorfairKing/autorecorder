@@ -1,0 +1,4 @@
+working-dir: ../down1/down2
+input:
+- send: "ls test-file\n"
+- wait: 100
