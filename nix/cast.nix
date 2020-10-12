@@ -9,19 +9,20 @@ let
     , default-columns ? null
     }:
       let
-        autorecorder = (import ./pkgs.nix).haskellPackages.autorecorder;
+        localPkgs = import ./pkgs.nix;
+        autorecorder = localPkgs.haskellPackages.autorecorder;
         yamlContents =
           builtins.fromJSON (
             builtins.readFile (
-              pkgs.stdenv.mkDerivation {
+              localPkgs.stdenv.mkDerivation {
                 name = "fromYAML";
                 phases = [ "buildPhase" ];
-                buildPhase = "${pkgs.yq}/bin/yq 'del(.input)' ${src} > $out";
+                buildPhase = "${localPkgs.yq}/bin/yq 'del(.input)' ${src} > $out";
               }
             )
           );
       in
-        pkgs.stdenv.mkDerivation {
+        localPkgs.stdenv.mkDerivation {
           inherit name;
           buildInputs = map (pkg: pkgs."${pkg}") (yamlContents.packages or []);
           buildCommand =
@@ -83,20 +84,20 @@ let
                     # echo dirToInclude ${dirToInclude}
                     # echo cdDir ${dirs.cdDir}
                     mkdir -p "$(dirname ${dirs.includeDirDestination})" # To make sure that the parent of the destination exists.
-                    ${pkgs.rsync}/bin/rsync -r ${dirToInclude}/ ${dirs.includeDirDestination}
-                    # ${pkgs.tree}/bin/tree
+                    ${localPkgs.rsync}/bin/rsync -r ${dirToInclude}/ ${dirs.includeDirDestination}
+                    # ${localPkgs.tree}/bin/tree
                     cd ${dirs.cdDir}
                     chmod -R 755 .
                     # set +x
                   '';
-              workingDirScript = pkgs.lib.optionalString
+              workingDirScript = localPkgs.lib.optionalString
                 (builtins.hasAttr "working-dir" yamlContents)
                 (makeWorkingDirScript yamlContents.working-dir);
               # Note [Sanity]
               # This needs to be run on shell startup for backspace and enter to work
               # correctly but it cannot be run from a script beforehand because it
               # only works in (pseudo) terminals.
-              bashRC = pkgs.writeText "bashrc" ''
+              bashRC = localPkgs.writeText "bashrc" ''
                 stty sane
 
                 export PS1="\\$ "
@@ -109,7 +110,7 @@ let
                 export TERM=xterm-256color
 
                 # To make sure that backspace works, see Note [Sanity]
-                export SHELL="${pkgs.bash}/bin/bash --rcfile ${bashRC}"
+                export SHELL="${localPkgs.bash}/bin/bash --rcfile ${bashRC}"
 
                 # To make sure that programs like 'tree' show nice unicode characters
                 export LANG=C.utf8
@@ -126,7 +127,7 @@ let
                 
                 # Record the cast
                 ${autorecorder}/bin/autorecorder record "${src}" "$out" \
-                  --working-dir "$(pwd)" ${pkgs.lib.optionalString (! builtins.isNull default-rows) "--default-rows ${builtins.toString default-rows}"} ${pkgs.lib.optionalString (! builtins.isNull default-columns) "--default-columns ${builtins.toString default-columns}"} \
+                  --working-dir "$(pwd)" ${localPkgs.lib.optionalString (! builtins.isNull default-rows) "--default-rows ${builtins.toString default-rows}"} ${localPkgs.lib.optionalString (! builtins.isNull default-columns) "--default-columns ${builtins.toString default-columns}"} \
                   --no-cleanup \
                   ${if debug then "--debug" else "--progress"}
               '';
