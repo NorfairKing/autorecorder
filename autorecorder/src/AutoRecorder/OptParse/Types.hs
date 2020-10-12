@@ -25,7 +25,8 @@ data RecordFlags
         recordFlagDefaultColumns :: Maybe Word16,
         recordFlagWorkingDir :: Maybe FilePath,
         recordFlagMistakeProbability :: Maybe Mistakes,
-        recordFlagOutputView :: Maybe OutputView
+        recordFlagOutputView :: Maybe OutputView,
+        recordFlagCleanup :: Maybe Bool
       }
   deriving (Show, Eq)
 
@@ -58,7 +59,8 @@ data RecordSettings
         recordSetDefaultColumns :: Word16,
         recordSetWorkingDir :: Maybe (Path Abs Dir),
         recordSetMistakes :: Mistakes,
-        recordSetOutputView :: OutputView
+        recordSetOutputView :: OutputView,
+        recordSetCleanup :: Bool
       }
   deriving (Show, Eq)
 

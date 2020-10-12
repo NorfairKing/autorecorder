@@ -99,7 +99,7 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
   mWorkingDir <- (recordSetWorkingDir <|>) <$> mapM (resolveDir parentDir) asciinemaWorkingDir
   let dirToResolveFiles = fromMaybe parentDir mWorkingDir
   withCurrentDir dirToResolveFiles
-    $ withRestoredFiles asciinemaFiles
+    $ (if recordSetCleanup then withRestoredFiles asciinemaFiles else id)
     $ do
       -- Get the output file's parent directory ready
       env <- getEnvironment

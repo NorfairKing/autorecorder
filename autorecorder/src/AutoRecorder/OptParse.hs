@@ -37,6 +37,7 @@ combineToInstructions (CommandRecord RecordFlags {..}) Flags Environment {..} _ 
   recordSetWorkingDir <- mapM resolveDir' recordFlagWorkingDir
   let recordSetMistakes = fromMaybe (MistakesWithProbability 0.03) recordFlagMistakeProbability
   let recordSetOutputView = fromMaybe DisplayOutputView recordFlagOutputView
+  let recordSetCleanup = fromMaybe True recordFlagCleanup
   let d = DispatchRecord RecordSettings {..}
   pure (Instructions d Settings)
 
@@ -107,6 +108,7 @@ parseCommandRecord = info parser modifier
                 <*> optional (strOption (mconcat [help "The working directory to record the cast in", metavar "DIRECTORY", long "working-dir"]))
                 <*> parseMistakesFlag
                 <*> parseOutputViewFlag
+                <*> optional (flag True False (mconcat [help "Don't clean up after the cast", long "no-cleanup"]))
             )
 
 parseSpeedFlag :: Parser (Maybe Double)

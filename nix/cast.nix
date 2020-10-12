@@ -127,6 +127,7 @@ let
                 # Record the cast
                 ${autorecorder}/bin/autorecorder record "${src}" "$out" \
                   --working-dir "$(pwd)" ${pkgs.lib.optionalString (! builtins.isNull default-rows) "--default-rows ${builtins.toString default-rows}"} ${pkgs.lib.optionalString (! builtins.isNull default-columns) "--default-columns ${builtins.toString default-columns}"} \
+                  --no-cleanup \
                   ${if debug then "--debug" else "--progress"}
               '';
 
