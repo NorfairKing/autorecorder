@@ -1,22 +1,21 @@
 { pkgs ? import <nixpkgs> {}
 }:
 let
-  fromYaml = yaml:
-    builtins.fromJSON (
-      builtins.readFile (
-        pkgs.stdenv.mkDerivation {
-          name = "fromYAML";
-          phases = [ "buildPhase" ];
-          buildPhase = "echo '${yaml}' | ${pkgs.yaml2json}/bin/yaml2json > $out";
-        }
-      )
-    );
   mkCastDerivation =
     { name
     , src
     }:
       let
-        yamlContents = fromYaml (builtins.readFile src);
+        yamlContents =
+          builtins.fromJSON (
+            builtins.readFile (
+              pkgs.stdenv.mkDerivation {
+                name = "fromYAML";
+                phases = [ "buildPhase" ];
+                buildPhase = "${pkgs.yq}/bin/yq 'del(.input)' ${src} > $out";
+              }
+            )
+          );
       in
         pkgs.stdenv.mkDerivation {
           inherit name;
