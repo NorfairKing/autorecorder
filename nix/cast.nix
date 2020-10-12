@@ -59,8 +59,14 @@ let
                       cdDir = dirs.cdDir;
                     }
                     else {
-                      includeDirSource = dirs.includeDirSource + "/${base}";
-                      includeDirDestination = dirs.includeDirSource + "/${base}";
+                      includeDirSource =
+                        if dirs.includeDirSource != "."
+                        then dirs.includeDirSource + "/${base}"
+                        else dirs.includeDirSource;
+                      includeDirDestination =
+                        if dirs.includeDirDestination != "."
+                        then dirs.includeDirDestination + "/${base}"
+                        else dirs.includeDirDestination;
                       cdDir = dirs.cdDir + "/${base}";
                     };
               makeWorkingDirScript = dir:
