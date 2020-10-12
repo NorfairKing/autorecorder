@@ -1,11 +1,15 @@
-{ pkgs ? import <nixpkgs> {}
+{ pkgs ? import ./pkgs.nix {}
 }:
 let
   mkCastDerivation =
     { name
     , src
+    , debug ? false
+    , default-rows ? null
+    , default-columns ? null
     }:
       let
+        autorecorder = (import ./pkgs.nix).haskellPackages.autorecorder;
         yamlContents =
           builtins.fromJSON (
             builtins.readFile (
@@ -82,6 +86,7 @@ let
                     ${pkgs.rsync}/bin/rsync -r ${dirToInclude}/ ${dirs.includeDirDestination}
                     # ${pkgs.tree}/bin/tree
                     cd ${dirs.cdDir}
+                    chmod -R 755 .
                     # set +x
                   '';
               workingDirScript = pkgs.lib.optionalString
@@ -113,15 +118,16 @@ let
                 # Set up a playground directory because otherwise there will be an envvar file
                 playground="casting-ground"
                 mkdir "$playground"
+                chmod -R 755 "$playground"
                 cd "$playground"
 
                 # Set up the right working dir
                 ${workingDirScript}
                 
                 # Record the cast
-                ${pkgs.autorecorder}/bin/autorecorder record "${src}" "$out" \
-                  --working-dir "$(pwd)" \
-                  --progress
+                ${autorecorder}/bin/autorecorder record "${src}" "$out" \
+                  --working-dir "$(pwd)" ${pkgs.lib.optionalString (! builtins.isNull default-rows) "--default-rows ${builtins.toString default-rows}"} ${pkgs.lib.optionalString (! builtins.isNull default-columns) "--default-columns ${builtins.toString default-columns}"} \
+                  ${if debug then "--debug" else "--progress"}
               '';
 
         };

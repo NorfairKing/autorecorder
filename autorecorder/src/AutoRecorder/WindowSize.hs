@@ -29,5 +29,5 @@ foreign import ccall "window_size.h c_set_window_size" c_setWindowSize :: Fd -> 
 
 setWindowSize :: Fd -> WindowSize -> IO ()
 setWindowSize fd WindowSize {..} = do
-  let val = (windowSizeRows `shiftL` 16) + windowSizeColumns
+  let val = (fromIntegral windowSizeRows `shiftL` 16) + fromIntegral windowSizeColumns :: Word
   c_setWindowSize fd $ fromIntegral val

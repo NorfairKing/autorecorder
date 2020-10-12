@@ -10,7 +10,6 @@ where
 import AutoRecorder.Input
 import AutoRecorder.OptParse.Types
 import AutoRecorder.Output
-import AutoRecorder.WindowSize
 import Data.Maybe
 import Data.Version
 import qualified Env
@@ -18,7 +17,6 @@ import Options.Applicative
 import Path.IO
 import Paths_autorecorder
 import qualified System.Environment as System
-import System.Posix.IO (stdOutput)
 
 getInstructions :: IO Instructions
 getInstructions = do
@@ -34,9 +32,8 @@ combineToInstructions (CommandRecord RecordFlags {..}) Flags Environment {..} _ 
   recordSetOutputFile <- resolveFile' recordFlagOutputFile
   let recordSetRows = recordFlagRows
   let recordSetColumns = recordFlagColumns
-  WindowSize {..} <- getWindowSize stdOutput
-  let recordSetDefaultRows = fromMaybe windowSizeRows recordFlagDefaultRows
-  let recordSetDefaultColumns = fromMaybe windowSizeColumns recordFlagDefaultColumns
+  let recordSetDefaultRows = fromMaybe 25 recordFlagDefaultRows
+  let recordSetDefaultColumns = fromMaybe 80 recordFlagDefaultColumns
   recordSetWorkingDir <- mapM resolveDir' recordFlagWorkingDir
   let recordSetMistakes = fromMaybe (MistakesWithProbability 0.03) recordFlagMistakeProbability
   let recordSetOutputView = fromMaybe DisplayOutputView recordFlagOutputView
