@@ -38,7 +38,7 @@ let
               #  ./foo/bar/spec.yaml   | baz/quux    | /build/baz/quux  | /build/         | /build/baz/quux  | yes   
               #  ./foo/bar/spec.yaml   | ..          | /build/bar       | /build/bar      | /build/          | yes
               #  ./foo/bar/spec.yaml   | ../..       | /build/foo/bar   | /build/foo/bar  | /build/          | yes
-              #  ./foo/bar/spec.yaml   | ../xyz      | /build/foo/xyz   | /build/bar      | /build/xyz       | no    
+              #  ./foo/bar/spec.yaml   | ../xyz      | /build/foo/xyz   | /build/bar      | /build/xyz       | yes
               #
               calculateDirs = srcDir: dir:
                 if dir == "."

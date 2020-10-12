@@ -40,6 +40,7 @@ with final.haskell.lib;
         "supsupdir-cast" = ../test-casts/supsupdir/subdir/subsubdir/spec.yaml;
         "supsupsupdir-cast" = ../test-casts/supsupsupdir/subdir/subsubdir/subsubsubdir/spec.yaml;
         "updown-cast" = ../test-casts/updown/up/spec.yaml;
+        "upupdown-cast" = ../test-casts/upupdown/up1/up2/spec.yaml;
       };
   haskellPackages =
     previous.haskellPackages.override (
