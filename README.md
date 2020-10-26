@@ -39,7 +39,7 @@ let
   mkCastDerivation = import (
       builtins.fetchGit {
         url = "https://github.com/NorfairKing/autorecorder";
-        rev = "d1c6d519a3c75cbc311722d649a87071d77f18ea";
+        rev = "da5bf9d61108a4a89addc8203b1579a364ce8c01";
         ref = "master";
       } + "/nix/cast.nix"
     ) { inherit pkgs; };
