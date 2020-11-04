@@ -95,7 +95,7 @@ let
                     chmod -R 755 "$(dirname ${dirs.includeDirDestination})"
   
                     # Copy over the required context
-                    ${localPkgs.rsync}/bin/rsync -r ${dirToInclude}/ ${dirs.includeDirDestination}
+                    ${localPkgs.rsync}/bin/rsync --no-p --no-g --chmod=ugo=rwX -r ${dirToInclude}/ ${dirs.includeDirDestination}
 
                     ${optionalString debug "${localPkgs.tree}/bin/tree"}
 
