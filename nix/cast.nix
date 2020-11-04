@@ -25,7 +25,7 @@ let
         localPkgs.stdenv.mkDerivation {
           inherit name;
           buildInputs = map (pkg: pkgs."${pkg}") (yamlContents.packages or []);
-          buildCommand =
+          buildCommand = with localPkgs.lib;
             let
               # This piece is surprisingly complex.
               # The spec file can specify a working dir for the cast to happen in, relative to the directory where the spec file is.
@@ -80,18 +80,32 @@ let
                   dirToInclude = srcDir + "/${dirs.includeDirSource}";
                 in
                   ''
-                    # set -x
-                    # echo dirToInclude ${dirToInclude}
-                    # echo cdDir ${dirs.cdDir}
-                    mkdir -p "$(dirname ${dirs.includeDirDestination})" # To make sure that the parent of the destination exists.
+                    ${optionalString debug ''
+                    echo "Showing a lot more info because debug is on."
+                    set -x
+                    echo dirToInclude ${dirToInclude}
+                    echo cdDir ${dirs.cdDir}
+                  ''}
+
+                    # Make sure that the parent of the destination exists.
+                    mkdir -p "$(dirname ${dirs.includeDirDestination})"
+
+                    # Make extra sure that copying will succeed
                     chmod -R 755 .
+                    chmod -R 755 "$(dirname ${dirs.includeDirDestination})"
+  
+                    # Copy over the required context
                     ${localPkgs.rsync}/bin/rsync -r ${dirToInclude}/ ${dirs.includeDirDestination}
-                    # ${localPkgs.tree}/bin/tree
+
+                    ${optionalString debug "${localPkgs.tree}/bin/tree"}
+
+                    # Move into the right dir
                     cd ${dirs.cdDir}
+
                     chmod -R 755 .
-                    # set +x
+                    ${optionalString debug "set +x"}
                   '';
-              workingDirScript = localPkgs.lib.optionalString
+              workingDirScript = optionalString
                 (builtins.hasAttr "working-dir" yamlContents)
                 (makeWorkingDirScript yamlContents.working-dir);
               # Note [Sanity]
@@ -128,7 +142,7 @@ let
                 
                 # Record the cast
                 ${autorecorder}/bin/autorecorder record "${src}" "$out" \
-                  --working-dir "$(pwd)" ${localPkgs.lib.optionalString (! builtins.isNull default-rows) "--default-rows ${builtins.toString default-rows}"} ${localPkgs.lib.optionalString (! builtins.isNull default-columns) "--default-columns ${builtins.toString default-columns}"} \
+                  --working-dir "$(pwd)" ${optionalString (! builtins.isNull default-rows) "--default-rows ${builtins.toString default-rows}"} ${optionalString (! builtins.isNull default-columns) "--default-columns ${builtins.toString default-columns}"} \
                   --no-cleanup \
                   ${if debug then "--debug" else "--progress"}
               '';

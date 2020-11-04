@@ -21,13 +21,14 @@ with final.haskell.lib;
             )
         );
     in
-      listToAttrs (map (file: nameValuePair "${file}-cast" (final.mkCastDerivation { name = "${file}-cast"; src = ../examples + "/${file}.yaml"; })) specFiles);
+      listToAttrs (map (file: nameValuePair "${file}-cast" (final.mkCastDerivation { name = "${file}-cast"; src = ../examples + "/${file}.yaml"; debug = true; })) specFiles);
   testCasts =
     let
       mkTest = name: path:
         final.mkCastDerivation {
           inherit name;
           src = path;
+          debug = true;
         };
     in
       mapAttrs mkTest {
