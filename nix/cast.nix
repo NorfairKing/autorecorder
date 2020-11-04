@@ -84,6 +84,7 @@ let
                     # echo dirToInclude ${dirToInclude}
                     # echo cdDir ${dirs.cdDir}
                     mkdir -p "$(dirname ${dirs.includeDirDestination})" # To make sure that the parent of the destination exists.
+                    chmod -R 755 .
                     ${localPkgs.rsync}/bin/rsync -r ${dirToInclude}/ ${dirs.includeDirDestination}
                     # ${localPkgs.tree}/bin/tree
                     cd ${dirs.cdDir}
