@@ -8,7 +8,8 @@ with final.haskell.lib;
       disableLibraryProfiling (final.haskellPackages.callCabal2nix "autorecorder" (final.gitignoreSource ../autorecorder) {})
     )
   );
-  mkCastDerivation = import ./cast.nix { pkgs = final; };
+  mkCastDerivationFunction = import ./cast.nix;
+  mkCastDerivation = final.mkCastDerivationFunction { pkgs = final; };
   exampleCasts =
     let
       specFiles = builtins.map (removeSuffix ".yaml")
