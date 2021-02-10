@@ -9,12 +9,12 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: cachix/install-nix-action@v12
     - name: free disk space
       run: |
         sudo rm -rf /opt
-    - uses: cachix/cachix-action@releases/v8
+    - uses: cachix/cachix-action@v8
       with:
         name: autorecorder
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
