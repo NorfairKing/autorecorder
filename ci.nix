@@ -1,7 +1,10 @@
 let
-  pkgs = import ./nix/pkgs.nix;
+  sources = import ./nix/sources.nix;
+  pkgs = import ./nix/pkgs.nix { inherit sources; };
+  pre-commit = import ./nix/pre-commit.nix { inherit sources; };
+
 in
 {
   inherit (pkgs) autorecorder;
-  pre-commit-hooks = (import ./nix/pre-commit-hooks.nix).run;
+  pre-commit-hooks = pre-commit.run;
 } // pkgs.exampleCasts // pkgs.testCasts

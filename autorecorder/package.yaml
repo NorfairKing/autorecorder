@@ -20,14 +20,16 @@ library:
   dependencies:
     - aeson
     - async
-    - envparse
-    - optparse-applicative
+    - autodocodec
+    - autodocodec-yaml
     - bytestring
     - conduit
     - containers
     - directory
     - dirforest
+    - envparse
     - normaldistribution
+    - optparse-applicative
     - path
     - path-io
     - random
@@ -38,7 +40,6 @@ library:
     - unix
     - unliftio
     - yaml
-    - yamlparse-applicative
 
 executables:
   autorecorder:

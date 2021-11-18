@@ -9,7 +9,7 @@ let
     , default-columns ? null
     }:
       let
-        localPkgs = import ./pkgs.nix;
+        localPkgs = import ./pkgs.nix {};
         autorecorder = localPkgs.haskellPackages.autorecorder;
         yamlContents =
           builtins.fromJSON (

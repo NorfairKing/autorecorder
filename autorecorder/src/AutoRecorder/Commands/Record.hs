@@ -11,14 +11,15 @@ import AutoRecorder.Output
 import AutoRecorder.Spec
 import AutoRecorder.Terminal
 import AutoRecorder.WindowSize
+import Autodocodec.Yaml
 import Conduit
 import Control.Applicative
 import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Exception
 import Control.Monad
-import qualified Data.ByteString as SB
 import Data.ByteString (ByteString)
+import qualified Data.ByteString as SB
 import qualified Data.ByteString.Lazy as LB
 import Data.DirForest (DirForest)
 import qualified Data.DirForest as DF
@@ -39,11 +40,10 @@ import System.Exit
 import System.IO
 import System.Process.Typed
 import System.Timeout
-import YamlParse.Applicative
 
 record :: RecordSettings -> IO ()
 record rs@RecordSettings {..} = do
-  mSpec <- readConfigFile recordSetSpecFile
+  mSpec <- readYamlConfigFile recordSetSpecFile
   case mSpec of
     Nothing -> die $ "File does not exist: " <> fromAbsFile recordSetSpecFile
     Just s -> do

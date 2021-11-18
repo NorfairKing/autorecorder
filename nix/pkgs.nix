@@ -1,21 +1,16 @@
+{ sources ? import ./sources.nix
+}:
 let
-  pkgsv = import (import ./nixpkgs.nix);
+  pkgsv = import sources.nixpkgs;
   pkgs = pkgsv {};
-  yamlparse-applicative-overlay =
-    import (
-      pkgs.fetchFromGitHub (import ./yamlparse-applicative-version.nix) + "/nix/overlay.nix"
-    );
-  dirforest-overlay =
-    import (
-      builtins.fetchGit (import ./dirforest-version.nix) + "/nix/overlay.nix"
-    );
 
 in
 pkgsv {
   overlays =
     [
-      yamlparse-applicative-overlay
-      dirforest-overlay
+      (import (sources.dirforest + "/nix/overlay.nix"))
+      (import (sources.autodocodec + "/nix/overlay.nix"))
+      (import (sources.safe-coloured-text + "/nix/overlay.nix"))
       (import ./gitignore-src.nix)
       (import ./overlay.nix)
     ];
