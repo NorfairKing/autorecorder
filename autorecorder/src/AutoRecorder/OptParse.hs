@@ -26,7 +26,7 @@ getInstructions = do
   combineToInstructions cmd flags env config
 
 combineToInstructions :: Command -> Flags -> Environment -> Maybe Configuration -> IO Instructions
-combineToInstructions (CommandRecord RecordFlags {..}) Flags Environment {..} _ = do
+combineToInstructions (CommandRecord RecordFlags {..}) Flags _ _ = do
   let recordSetSpeed = fromMaybe 1 recordFlagSpeed
   recordSetSpecFile <- resolveFile' recordFlagSpecFile
   recordSetOutputFile <- resolveFile' recordFlagOutputFile

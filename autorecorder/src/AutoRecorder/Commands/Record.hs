@@ -169,7 +169,7 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
               pure $ completeCast rs spec env' recordSetSpeed start inputEvents outputEvents
 
 completeCast :: RecordSettings -> ASCIInemaSpec -> [(String, String)] -> Speed -> UTCTime -> [(UTCTime, Text)] -> [(UTCTime, ByteString)] -> Cast
-completeCast sets@RecordSettings {..} spec@ASCIInemaSpec {..} env speed start inputs outputs =
+completeCast sets spec@ASCIInemaSpec {..} env speed start inputs outputs =
   let castEvents = map (eventSpeedUp speed) $ interleaveEvents start inputs outputs
       castHeader =
         Header

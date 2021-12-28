@@ -1,27 +1,18 @@
-resolver: lts-16.12
+resolver: lts-18.16
 packages:
 - autorecorder
 extra-deps:
 - github: NorfairKing/dirforest
-  commit: 8dba4d4a5be45c293a33480264e55d2cb8b71d3f
+  commit: 69e8ae036b047fae105c1fe990e175a7572a3eba
   subdirs:
     - dirforest
-- github: NorfairKing/safe-coloured-text
-  commit: bd8700a555e977004e2dec24e12494a5a01ca500
-  subdirs:
-    - safe-coloured-text
-    - safe-coloured-text-gen
-    - safe-coloured-text-layout
-    - safe-coloured-text-layout-gen
-    - safe-coloured-text-terminfo
 - github: NorfairKing/autodocodec
-  commit: e5a54ccc0d09b600fdf784624e7df38b55676384
+  commit: 9880ec062f1166bdac50b8eb59c6dd010bc9af0c
   subdirs:
     - autodocodec
     - autodocodec-schema
     - autodocodec-yaml
 - normaldistribution-1.1.0.3@sha256:2615b784c4112cbf6ffa0e2b55b76790290a9b9dff18a05d8c89aa374b213477,2160
-- envparse-0.4.1@sha256:989902e6368532548f61de1fa245ad2b39176cddd8743b20071af519a709ce30,2842
 
 nix:
   shell-file: shell.nix

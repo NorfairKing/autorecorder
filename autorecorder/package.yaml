@@ -3,11 +3,8 @@ version: 0.0.0.0
 github: "NorfairKing/autorecorder"
 author: "Tom Sydney Kerckhove"
 maintainer: "syd@cs-syd.eu"
-copyright: "Copyright (c) 2020 Tom Sydney Kerckhove"
+copyright: "Copyright (c) 2022 Tom Sydney Kerckhove"
 license: MIT
-
-extra-source-files:
-- LICENSE
 
 dependencies:
 - base >= 4.7 && < 5

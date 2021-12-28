@@ -2,12 +2,15 @@ final: previous:
 with final.lib;
 with final.haskell.lib;
 
-{
+let
   autorecorder = generateOptparseApplicativeCompletion "autorecorder" (
-    failOnAllWarnings (
-      disableLibraryProfiling (final.haskellPackages.callCabal2nix "autorecorder" (final.gitignoreSource ../autorecorder) {})
+    buildStrictly (
+      disableLibraryProfiling (final.haskellPackages.callCabal2nixWithOptions "autorecorder" (final.gitignoreSource ../autorecorder) "--no-hpack" {})
     )
   );
+in
+{
+  autorecorder = justStaticExecutables autorecorder;
   mkCastDerivationFunction = import ./cast.nix;
   mkCastDerivation = final.mkCastDerivationFunction { pkgs = final; };
   exampleCasts =
