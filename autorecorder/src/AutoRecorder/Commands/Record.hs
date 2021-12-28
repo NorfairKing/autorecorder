@@ -41,14 +41,14 @@ import System.IO
 import System.Process.Typed
 import System.Timeout
 
-record :: RecordSettings -> IO ()
-record rs@RecordSettings {..} = do
-  mSpec <- readYamlConfigFile recordSetSpecFile
+record :: Settings -> IO ()
+record rs@Settings {..} = do
+  mSpec <- readYamlConfigFile settingSpecFile
   case mSpec of
-    Nothing -> die $ "File does not exist: " <> fromAbsFile recordSetSpecFile
+    Nothing -> die $ "File does not exist: " <> fromAbsFile settingSpecFile
     Just s -> do
-      cast <- runASCIInema rs recordSetSpecFile s
-      LB.writeFile (fromAbsFile recordSetOutputFile) (renderCast cast)
+      cast <- runASCIInema rs settingSpecFile s
+      LB.writeFile (fromAbsFile settingOutputFile) (renderCast cast)
 
 withRestoredFiles :: [FilePath] -> IO a -> IO a
 withRestoredFiles fs func =
@@ -94,13 +94,13 @@ restoreFile = \case
     ensureDir p
     DF.write p df (\p_ bs -> SB.writeFile (fromAbsFile p_) bs)
 
-runASCIInema :: RecordSettings -> Path Abs File -> ASCIInemaSpec -> IO Cast
-runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
+runASCIInema :: Settings -> Path Abs File -> ASCIInemaSpec -> IO Cast
+runASCIInema rs@Settings {..} specFilePath spec@ASCIInemaSpec {..} = do
   let parentDir = parent specFilePath
-  mWorkingDir <- (recordSetWorkingDir <|>) <$> mapM (resolveDir parentDir) asciinemaWorkingDir
+  mWorkingDir <- (settingWorkingDir <|>) <$> mapM (resolveDir parentDir) asciinemaWorkingDir
   let dirToResolveFiles = fromMaybe parentDir mWorkingDir
   withCurrentDir dirToResolveFiles
-    $ (if recordSetCleanup then withRestoredFiles asciinemaFiles else id)
+    $ (if settingCleanup then withRestoredFiles asciinemaFiles else id)
     $ do
       -- Get the output file's parent directory ready
       env <- getEnvironment
@@ -116,7 +116,7 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
             Just s -> pure $ shell s
         Just c -> pure $ shell c
       -- Make sure the output file can be created nicely
-      ensureDir $ parent recordSetOutputFile
+      ensureDir $ parent settingOutputFile
       withPseudoTerminal $ \Terminal {..} -> do
         let apc =
               maybe id (setWorkingDir . fromAbsDir) mWorkingDir
@@ -142,8 +142,8 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
                     [SendInput "exit\r" | isNothing asciinemaCommand],
                     [Wait 500]
                   ]
-          let inSender = runConduit $ inputWriter specFilePath recordSetOutputView recordSetSpeed recordSetMistakes tAttributes tMasterHandle commands
-          let outReader = runConduit $ outputConduit recordSetOutputView outVar tMasterHandle
+          let inSender = runConduit $ inputWriter specFilePath settingOutputView settingSpeed settingMistakes tAttributes tMasterHandle commands
+          let outReader = runConduit $ outputConduit settingOutputView outVar tMasterHandle
           mExitedNormally <-
             timeout (asciinemaTimeout * 1000 * 1000) $
               race -- For some reason the output conduit never finishes, so this works.
@@ -166,10 +166,10 @@ runASCIInema rs@RecordSettings {..} specFilePath spec@ASCIInemaSpec {..} = do
                       ExitSuccess -> 0
                       ExitFailure i -> fromIntegral i
                 unless (actual == expected) $ die $ unwords ["The casted process has an unexpected exit code:", show actual]
-              pure $ completeCast rs spec env' recordSetSpeed start inputEvents outputEvents
+              pure $ completeCast rs spec settingSpeed start inputEvents outputEvents
 
-completeCast :: RecordSettings -> ASCIInemaSpec -> [(String, String)] -> Speed -> UTCTime -> [(UTCTime, Text)] -> [(UTCTime, ByteString)] -> Cast
-completeCast sets spec@ASCIInemaSpec {..} env speed start inputs outputs =
+completeCast :: Settings -> ASCIInemaSpec -> Speed -> UTCTime -> [(UTCTime, Text)] -> [(UTCTime, ByteString)] -> Cast
+completeCast sets spec@ASCIInemaSpec {..} speed start inputs outputs =
   let castEvents = map (eventSpeedUp speed) $ interleaveEvents start inputs outputs
       castHeader =
         Header
@@ -181,12 +181,13 @@ completeCast sets spec@ASCIInemaSpec {..} env speed start inputs outputs =
             headerIdleTimeLimit = Nothing,
             headerCommand = asciinemaCommand,
             headerTitle = Nothing,
-            headerEnv = Just $ M.filterWithKey (\k _ -> k == "TERM" || k == "SHELL") $ M.fromList env
+            -- Purposefully empty, so we don't leak a nix store path into the cast file.
+            headerEnv = Nothing
           }
    in Cast {..}
 
-deriveWindowSize :: RecordSettings -> ASCIInemaSpec -> WindowSize
-deriveWindowSize RecordSettings {..} ASCIInemaSpec {..} =
-  let windowSizeRows = fromMaybe recordSetDefaultRows $ recordSetRows <|> asciinemaRows
-      windowSizeColumns = fromMaybe recordSetDefaultColumns $ recordSetColumns <|> asciinemaColumns
+deriveWindowSize :: Settings -> ASCIInemaSpec -> WindowSize
+deriveWindowSize Settings {..} ASCIInemaSpec {..} =
+  let windowSizeRows = fromMaybe settingDefaultRows $ settingRows <|> asciinemaRows
+      windowSizeColumns = fromMaybe settingDefaultColumns $ settingColumns <|> asciinemaColumns
    in WindowSize {..}

@@ -18,7 +18,7 @@ environment:
   ASCIINEMA_CONFIG_HOME:
     "./config/asciinema"
 input:
-- type: "autorecorder record echo.yaml echo.cast --progress\n"
+- type: "autorecorder echo.yaml echo.cast --progress\n"
 - wait: 10000
 - type: "asciinema play echo.cast\n"
 - wait: 10000
@@ -39,7 +39,7 @@ let
   mkCastDerivation = import (
       builtins.fetchGit {
         url = "https://github.com/NorfairKing/autorecorder";
-        rev = "da5bf9d61108a4a89addc8203b1579a364ce8c01";
+        rev = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; # Use a recent commit.
         ref = "master";
       } + "/nix/cast.nix"
     ) { inherit pkgs; };

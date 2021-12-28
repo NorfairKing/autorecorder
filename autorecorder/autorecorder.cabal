@@ -49,7 +49,6 @@ library
     , containers
     , directory
     , dirforest
-    , envparse
     , normaldistribution
     , optparse-applicative
     , path

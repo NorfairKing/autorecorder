@@ -141,7 +141,7 @@ let
                 ${workingDirScript}
                 
                 # Record the cast
-                ${autorecorder}/bin/autorecorder record "${src}" "$out" \
+                ${autorecorder}/bin/autorecorder "${src}" "$out" \
                   --working-dir "$(pwd)" ${optionalString (! builtins.isNull default-rows) "--default-rows ${builtins.toString default-rows}"} ${optionalString (! builtins.isNull default-columns) "--default-columns ${builtins.toString default-columns}"} \
                   --no-cleanup \
                   ${if debug then "--debug" else "--progress"}

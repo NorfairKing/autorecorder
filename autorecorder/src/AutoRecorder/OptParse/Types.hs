@@ -8,62 +8,34 @@ import AutoRecorder.Output
 import Data.Word
 import Path
 
-data Arguments = Arguments Command Flags
-  deriving (Show, Eq)
-
-data Command = CommandRecord RecordFlags
-  deriving (Show, Eq)
-
-data RecordFlags
-  = RecordFlags
-      { recordFlagSpecFile :: !FilePath,
-        recordFlagOutputFile :: !FilePath,
-        recordFlagSpeed :: !(Maybe Double),
-        recordFlagRows :: !(Maybe Word16),
-        recordFlagColumns :: !(Maybe Word16),
-        recordFlagDefaultRows :: !(Maybe Word16),
-        recordFlagDefaultColumns :: !(Maybe Word16),
-        recordFlagWorkingDir :: !(Maybe FilePath),
-        recordFlagMistakeProbability :: !(Maybe Mistakes),
-        recordFlagOutputView :: !(Maybe OutputView),
-        recordFlagCleanup :: !(Maybe Bool)
-      }
-  deriving (Show, Eq)
-
 data Flags
   = Flags
-  deriving (Show, Eq)
-
-data Configuration
-
-data Environment
-  = Environment
-      { envAsciinemaConfigDir :: !(Maybe FilePath)
-      }
-  deriving (Show, Eq)
-
-data Instructions = Instructions Dispatch Settings
-  deriving (Show, Eq)
-
-data Dispatch = DispatchRecord RecordSettings
-  deriving (Show, Eq)
-
-data RecordSettings
-  = RecordSettings
-      { recordSetSpecFile :: !(Path Abs File),
-        recordSetOutputFile :: !(Path Abs File),
-        recordSetSpeed :: !Double,
-        recordSetRows :: !(Maybe Word16),
-        recordSetColumns :: !(Maybe Word16),
-        recordSetDefaultRows :: !Word16,
-        recordSetDefaultColumns :: !Word16,
-        recordSetWorkingDir :: !(Maybe (Path Abs Dir)),
-        recordSetMistakes :: !Mistakes,
-        recordSetOutputView :: !OutputView,
-        recordSetCleanup :: !Bool
+      { flagSpecFile :: !FilePath,
+        flagOutputFile :: !FilePath,
+        flagSpeed :: !(Maybe Double),
+        flagRows :: !(Maybe Word16),
+        flagColumns :: !(Maybe Word16),
+        flagDefaultRows :: !(Maybe Word16),
+        flagDefaultColumns :: !(Maybe Word16),
+        flagWorkingDir :: !(Maybe FilePath),
+        flagMistakeProbability :: !(Maybe Mistakes),
+        flagOutputView :: !(Maybe OutputView),
+        flagCleanup :: !(Maybe Bool)
       }
   deriving (Show, Eq)
 
 data Settings
   = Settings
+      { settingSpecFile :: !(Path Abs File),
+        settingOutputFile :: !(Path Abs File),
+        settingSpeed :: !Double,
+        settingRows :: !(Maybe Word16),
+        settingColumns :: !(Maybe Word16),
+        settingDefaultRows :: !Word16,
+        settingDefaultColumns :: !Word16,
+        settingWorkingDir :: !(Maybe (Path Abs Dir)),
+        settingMistakes :: !Mistakes,
+        settingOutputView :: !OutputView,
+        settingCleanup :: !Bool
+      }
   deriving (Show, Eq)

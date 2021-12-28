@@ -7,7 +7,7 @@ environment:
   ASCIINEMA_CONFIG_HOME:
     "./config/asciinema"
 input:
-- type: "autorecorder record echo.yaml echo.cast --progress\n"
+- type: "autorecorder echo.yaml echo.cast --progress\n"
 - wait: 10000
 - type: "asciinema play echo.cast\n"
 - wait: 10000
