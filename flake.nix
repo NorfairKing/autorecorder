@@ -48,10 +48,10 @@
         packages.default = pkgs.autorecorder;
         checks =
           let
-            casts = import ./nix/test.nix { inherit pkgs; autorecorder = pkgs.autorecorder; };
+            casts = import ./nix/test.nix { inherit pkgs; };
           in
           {
-            casts = pkgs.symlinkJoin { name = "casts"; paths = pkgs.lib.attrValues casts; };
+            casts = pkgs.linkFarmFromDrvs "casts" (pkgs.lib.attrValues casts);
             pre-commit = pre-commit-hooks.lib.${system}.run {
               src = ./.;
               hooks = {

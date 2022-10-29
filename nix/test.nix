@@ -1,9 +1,8 @@
-{ autorecorder
-, pkgs
+{ pkgs
 }:
 with pkgs.lib;
 let
-  mkCastDerivation = autorecorder.passthru.mkCastDerivationFunction { inherit pkgs; };
+  mkCastDerivation = pkgs.autorecorder.passthru.mkCastDerivation;
   exampleCasts =
     let
       specFiles = builtins.map (removeSuffix ".yaml")
@@ -22,7 +21,7 @@ let
           file: nameValuePair "${file}-cast" (
             mkCastDerivation {
               name = "${file}-cast";
-              src = ../examples + "/${file}.yaml";
+              src = ../examples/${file}.yaml;
               # debug = true;
             }
           )
