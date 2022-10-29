@@ -4,8 +4,8 @@ module AutoRecorder.Output where
 
 import Conduit
 import Control.Concurrent.STM
-import qualified Data.ByteString as SB
 import Data.ByteString (ByteString)
+import qualified Data.ByteString as SB
 import qualified Data.Conduit.Combinators as C
 import Data.Time
 import GHC.IO.Handle

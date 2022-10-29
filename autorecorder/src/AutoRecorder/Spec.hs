@@ -9,19 +9,18 @@ import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Word
 
-data ASCIInemaSpec
-  = ASCIInemaSpec
-      { asciinemaCommand :: Maybe String,
-        asciinemaTimeout :: Int, -- Seconds
-        asciinemaFiles :: [FilePath],
-        asciinemaRows :: Maybe Word16,
-        asciinemaColumns :: Maybe Word16,
-        asciinemaWorkingDir :: Maybe FilePath,
-        asciinemaEnvironment :: Map String String,
-        asciinemaAllowFail :: Bool,
-        asciinemaExpectExitCode :: Maybe Word8,
-        asciinemaInput :: [ASCIInemaCommand]
-      }
+data ASCIInemaSpec = ASCIInemaSpec
+  { asciinemaCommand :: Maybe String,
+    asciinemaTimeout :: Int, -- Seconds
+    asciinemaFiles :: [FilePath],
+    asciinemaRows :: Maybe Word16,
+    asciinemaColumns :: Maybe Word16,
+    asciinemaWorkingDir :: Maybe FilePath,
+    asciinemaEnvironment :: Map String String,
+    asciinemaAllowFail :: Bool,
+    asciinemaExpectExitCode :: Maybe Word8,
+    asciinemaInput :: [ASCIInemaCommand]
+  }
   deriving (Show, Eq)
 
 instance HasCodec ASCIInemaSpec where
@@ -47,16 +46,16 @@ data ASCIInemaCommand
 
 instance HasCodec ASCIInemaCommand where
   codec =
-    dimapCodec f g
-      $ eitherCodec
+    dimapCodec f g $
+      eitherCodec
         (object "Wait" $ requiredField "wait" "How long to wait (in milliseconds)")
-      $ eitherCodec
-        (object "SendInput" $ requiredField "send" "The input to send")
-        ( object "Type" $
-            (,)
-              <$> requiredField "type" "The input to send" .= fst
-              <*> optionalFieldWithDefault "delay" 100 "How long to wait between keystrokes (in milliseconds)" .= snd
-        )
+        $ eitherCodec
+          (object "SendInput" $ requiredField "send" "The input to send")
+          ( object "Type" $
+              (,)
+                <$> requiredField "type" "The input to send" .= fst
+                <*> optionalFieldWithDefault "delay" 100 "How long to wait between keystrokes (in milliseconds)" .= snd
+          )
     where
       f = \case
         Left w -> Wait w

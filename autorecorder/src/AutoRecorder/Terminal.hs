@@ -9,13 +9,12 @@ import System.Posix.Terminal
 import System.Posix.Types (Fd)
 import UnliftIO
 
-data Terminal
-  = Terminal
-      { tMasterHandle :: !Handle,
-        tSlaveHandle :: !Handle,
-        tFd :: !Fd,
-        tAttributes :: !TerminalAttributes
-      }
+data Terminal = Terminal
+  { tMasterHandle :: !Handle,
+    tSlaveHandle :: !Handle,
+    tFd :: !Fd,
+    tAttributes :: !TerminalAttributes
+  }
 
 withPseudoTerminal ::
   MonadUnliftIO m =>

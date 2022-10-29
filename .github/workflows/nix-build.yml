@@ -2,22 +2,37 @@ name: "Nix Build"
 on:
   pull_request:
   push:
-    branches:
-      - development
-      - master
+    branches: [development, master]
 jobs:
-  tests:
-    runs-on: ubuntu-latest
+  build:
+    name: ${{ matrix.attribute }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        attribute:
+          - .#devShells.x86_64-linux.default
+          - .#packages.x86_64-linux.default
+          - .#checks.x86_64-linux.pre-commit
+          - .#checks.x86_64-linux.casts
     steps:
-    - uses: actions/checkout@v2
-    - uses: cachix/install-nix-action@v12
+    - uses: actions/checkout@v2.5.0
+    - uses: cachix/install-nix-action@v18
+      with:
+        extra_nix_config: |
+          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          system-features = nixos-test benchmark big-parallel kvm
     - name: free disk space
       run: |
-        sudo rm -rf /opt
-    - uses: cachix/cachix-action@v8
+        if [[ "${{matrix.os}}" == "ubuntu-latest" ]]
+        then
+          sudo rm -rf /opt
+        fi
+    - uses: cachix/cachix-action@v11
       with:
         name: autorecorder
+        extraPullNames: validity,safe-coloured-text,autodocodec,dirforest
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-        extraPullNames: dirforest,yamlparse,validity
-    - run: nix-build ci.nix
-
+    - run: nix build "${{matrix.attribute}}"

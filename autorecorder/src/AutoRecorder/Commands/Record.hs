@@ -92,81 +92,81 @@ restoreFile = \case
     SB.writeFile (fromAbsFile p) bs
   DirWithContents p df -> do
     ensureDir p
-    DF.write p df (\p_ bs -> SB.writeFile (fromAbsFile p_) bs)
+    DF.write p df (SB.writeFile . fromAbsFile)
 
 runASCIInema :: Settings -> Path Abs File -> ASCIInemaSpec -> IO Cast
 runASCIInema rs@Settings {..} specFilePath spec@ASCIInemaSpec {..} = do
   let parentDir = parent specFilePath
   mWorkingDir <- (settingWorkingDir <|>) <$> mapM (resolveDir parentDir) asciinemaWorkingDir
   let dirToResolveFiles = fromMaybe parentDir mWorkingDir
-  withCurrentDir dirToResolveFiles
-    $ (if settingCleanup then withRestoredFiles asciinemaFiles else id)
-    $ do
-      -- Get the output file's parent directory ready
-      env <- getEnvironment
-      let env' =
-            concat
-              [ env,
-                M.toList asciinemaEnvironment
-              ]
-      pc <- case asciinemaCommand of
-        Nothing ->
-          case lookup "SHELL" env of
-            Nothing -> die "No shell configured"
-            Just s -> pure $ shell s
-        Just c -> pure $ shell c
-      -- Make sure the output file can be created nicely
-      ensureDir $ parent settingOutputFile
-      withPseudoTerminal $ \Terminal {..} -> do
-        let apc =
-              maybe id (setWorkingDir . fromAbsDir) mWorkingDir
-                $ setEnv env'
-                $ setCreateGroup True
-                $ setNewSession True
-                $ setStdin (useHandleClose tSlaveHandle)
-                $ setStdout (useHandleClose tSlaveHandle)
-                $ setStderr (useHandleClose tSlaveHandle) pc
-        hSetBuffering stdout LineBuffering -- For progress output
-        hSetBuffering stderr LineBuffering
-        hSetBuffering tMasterHandle NoBuffering
-        hSetBuffering tSlaveHandle NoBuffering
-        let windowSize = deriveWindowSize rs spec
-        setWindowSize tFd windowSize
-        withProcessWait apc $ \p -> do
-          start <- getCurrentTime
-          outVar <- newTVarIO []
-          let commands =
-                concat
-                  [ [Wait 500],
-                    asciinemaInput,
-                    [SendInput "exit\r" | isNothing asciinemaCommand],
-                    [Wait 500]
-                  ]
-          let inSender = runConduit $ inputWriter specFilePath settingOutputView settingSpeed settingMistakes tAttributes tMasterHandle commands
-          let outReader = runConduit $ outputConduit settingOutputView outVar tMasterHandle
-          mExitedNormally <-
-            timeout (asciinemaTimeout * 1000 * 1000) $
-              race -- For some reason the output conduit never finishes, so this works.
-                inSender
-                outReader
-          case mExitedNormally of
-            Nothing -> do
-              stopProcess p
-              die $ unwords ["the recording got stuck for", show asciinemaTimeout, "seconds."]
-            Just (Right _) -> die "Should not happen: The outputter finished before the inputter"
-            Just (Left inputEvents) -> do
-              outputEvents <- readTVarIO outVar
-              ec <- waitExitCode p
-              when (not asciinemaAllowFail && isNothing asciinemaExpectExitCode) $
-                case ec of
-                  ExitSuccess -> pure ()
-                  ExitFailure c -> die $ unwords ["The casted process has exited with exit code", show c]
-              forM_ asciinemaExpectExitCode $ \expected -> do
-                let actual = case ec of
-                      ExitSuccess -> 0
-                      ExitFailure i -> fromIntegral i
-                unless (actual == expected) $ die $ unwords ["The casted process has an unexpected exit code:", show actual]
-              pure $ completeCast rs spec settingSpeed start inputEvents outputEvents
+  withCurrentDir dirToResolveFiles $
+    (if settingCleanup then withRestoredFiles asciinemaFiles else id) $
+      do
+        -- Get the output file's parent directory ready
+        env <- getEnvironment
+        let env' =
+              concat
+                [ env,
+                  M.toList asciinemaEnvironment
+                ]
+        pc <- case asciinemaCommand of
+          Nothing ->
+            case lookup "SHELL" env of
+              Nothing -> die "No shell configured"
+              Just s -> pure $ shell s
+          Just c -> pure $ shell c
+        -- Make sure the output file can be created nicely
+        ensureDir $ parent settingOutputFile
+        withPseudoTerminal $ \Terminal {..} -> do
+          let apc =
+                maybe id (setWorkingDir . fromAbsDir) mWorkingDir $
+                  setEnv env' $
+                    setCreateGroup True $
+                      setNewSession True $
+                        setStdin (useHandleClose tSlaveHandle) $
+                          setStdout (useHandleClose tSlaveHandle) $
+                            setStderr (useHandleClose tSlaveHandle) pc
+          hSetBuffering stdout LineBuffering -- For progress output
+          hSetBuffering stderr LineBuffering
+          hSetBuffering tMasterHandle NoBuffering
+          hSetBuffering tSlaveHandle NoBuffering
+          let windowSize = deriveWindowSize rs spec
+          setWindowSize tFd windowSize
+          withProcessWait apc $ \p -> do
+            start <- getCurrentTime
+            outVar <- newTVarIO []
+            let commands =
+                  concat
+                    [ [Wait 500],
+                      asciinemaInput,
+                      [SendInput "exit\r" | isNothing asciinemaCommand],
+                      [Wait 500]
+                    ]
+            let inSender = runConduit $ inputWriter specFilePath settingOutputView settingSpeed settingMistakes tAttributes tMasterHandle commands
+            let outReader = runConduit $ outputConduit settingOutputView outVar tMasterHandle
+            mExitedNormally <-
+              timeout (asciinemaTimeout * 1000 * 1000) $
+                race -- For some reason the output conduit never finishes, so this works.
+                  inSender
+                  outReader
+            case mExitedNormally of
+              Nothing -> do
+                stopProcess p
+                die $ unwords ["the recording got stuck for", show asciinemaTimeout, "seconds."]
+              Just (Right _) -> die "Should not happen: The outputter finished before the inputter"
+              Just (Left inputEvents) -> do
+                outputEvents <- readTVarIO outVar
+                ec <- waitExitCode p
+                when (not asciinemaAllowFail && isNothing asciinemaExpectExitCode) $
+                  case ec of
+                    ExitSuccess -> pure ()
+                    ExitFailure c -> die $ unwords ["The casted process has exited with exit code", show c]
+                forM_ asciinemaExpectExitCode $ \expected -> do
+                  let actual = case ec of
+                        ExitSuccess -> 0
+                        ExitFailure i -> fromIntegral i
+                  unless (actual == expected) $ die $ unwords ["The casted process has an unexpected exit code:", show actual]
+                pure $ completeCast rs spec settingSpeed start inputEvents outputEvents
 
 completeCast :: Settings -> ASCIInemaSpec -> Speed -> UTCTime -> [(UTCTime, Text)] -> [(UTCTime, ByteString)] -> Cast
 completeCast sets spec@ASCIInemaSpec {..} speed start inputs outputs =

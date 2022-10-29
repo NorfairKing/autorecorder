@@ -34,17 +34,16 @@ parseCast bs =
           castEvents <- mapM JSON.eitherDecode es
           pure Cast {..}
 
-data Header
-  = Header
-      { headerWindowSize :: WindowSize,
-        headerStartTimestamp :: Maybe UTCTime,
-        headerDuration :: Maybe Double,
-        headerIdleTimeLimit :: Maybe Double,
-        headerCommand :: Maybe String,
-        headerTitle :: Maybe Text,
-        headerEnv :: Maybe (Map String String)
-        -- castTheme :: Maybe ColourTheme
-      }
+data Header = Header
+  { headerWindowSize :: WindowSize,
+    headerStartTimestamp :: Maybe UTCTime,
+    headerDuration :: Maybe Double,
+    headerIdleTimeLimit :: Maybe Double,
+    headerCommand :: Maybe String,
+    headerTitle :: Maybe Text,
+    headerEnv :: Maybe (Map String String)
+    -- castTheme :: Maybe ColourTheme
+  }
   deriving (Show, Eq)
 
 instance FromJSON Header where
@@ -55,7 +54,7 @@ instance FromJSON Header where
                 <$> o .: "height"
                 <*> o .: "width"
             )
-        <*> ((fmap (show :: Int -> String) <$> o .:? "timestamp") >>= traverse (parseTimeM False defaultTimeLocale "%s"))
+        <*> (o .:? "timestamp" >>= traverse (parseTimeM False defaultTimeLocale "%s") . fmap (show :: Int -> String))
         <*> o .:? "duration"
         <*> o .:? "idle_time_limit"
         <*> o .:? "command"
@@ -96,11 +95,10 @@ instance ToJSON Header where
 --   | Palette16 Colour Colour Colour Colour Colour Colour Colour Colour Colour Colour Colour Colour Colour Colour Colour Colour
 --   deriving (Show, Eq)
 
-data Event
-  = Event
-      { eventTime :: Double,
-        eventData :: EventData
-      }
+data Event = Event
+  { eventTime :: Double,
+    eventData :: EventData
+  }
   deriving (Show, Eq)
 
 data EventData

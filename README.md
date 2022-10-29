@@ -28,24 +28,3 @@ I would put a link to the output cast here as well but https://asciinema.org is 
 See the `examples` directory for more examples.
 
 For the full spec file format, try recording a cast for an invalid spec file, and the error message will show you the format (in colour!).
-
-
-## Calling from nix
-
-Import the `mkCastDerivation` function, then call it on your spec:
-
-```
-let
-  mkCastDerivation = import (
-      builtins.fetchGit {
-        url = "https://github.com/NorfairKing/autorecorder";
-        rev = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; # Use a recent commit.
-        ref = "master";
-      } + "/nix/cast.nix"
-    ) { inherit pkgs; };
-in
-  mkCastDerivation {
-    name = "my-cast";
-    src = ./my-cast-spec.yaml;
-  }
-```

@@ -65,5 +65,7 @@ extra-deps:
 
 - normaldistribution-1.1.0.3@sha256:2615b784c4112cbf6ffa0e2b55b76790290a9b9dff18a05d8c89aa374b213477,2160
 
+system-ghc: true
 nix:
-  shell-file: shell.nix
+  enable: false
+with-hpack: hpack

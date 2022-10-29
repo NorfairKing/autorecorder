@@ -8,11 +8,10 @@ import Data.Word
 import Foreign.C.Types (CInt (..), CLong (..), CShort (..))
 import System.Posix.Types (Fd (..))
 
-data WindowSize
-  = WindowSize
-      { windowSizeRows :: Word16,
-        windowSizeColumns :: Word16
-      }
+data WindowSize = WindowSize
+  { windowSizeRows :: Word16,
+    windowSizeColumns :: Word16
+  }
   deriving (Show, Eq)
 
 foreign import ccall "window_size.h c_get_window_size" c_getWindowSize :: Fd -> IO CLong

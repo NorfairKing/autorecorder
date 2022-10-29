@@ -13,8 +13,8 @@ import qualified Data.Conduit.Combinators as C
 import Data.Conduit.List (sourceList)
 import Data.Maybe
 import Data.Random.Normal
-import qualified Data.Text as T
 import Data.Text (Text)
+import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text.IO as T
 import Data.Time
