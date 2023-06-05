@@ -15,7 +15,7 @@ in
   inherit mkCastDerivationFunction mkCastDerivation;
   haskellPackages = prev.haskellPackages.override (old: {
     overrides = final.lib.composeExtensions (old.overrides or (_: _: { })) (self: super: {
-      autorecorder = generateOptparseApplicativeCompletion "autorecorder" (buildStrictly (self.callPackage ../autorecorder { }));
+      autorecorder = self.generateOptparseApplicativeCompletions [ "autorecorder" ] (buildStrictly (self.callPackage ../autorecorder { }));
     });
   });
 }

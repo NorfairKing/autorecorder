@@ -18,4 +18,5 @@ mkDerivation {
   executableHaskellDepends = [ base ];
   homepage = "https://github.com/NorfairKing/autorecorder#readme";
   license = lib.licenses.mit;
+  mainProgram = "autorecorder";
 }

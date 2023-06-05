@@ -39,7 +39,9 @@ inputWriter specFile ov speed mistakes attrs handle commands =
       _ -> sourceList commands .| ic
   )
     (inputConduit speed mistakes attrs)
-    .| inputRecorder `fuseUpstream` C.map TE.encodeUtf8 `fuseUpstream` sinkHandle handle
+    .| inputRecorder
+    `fuseUpstream` C.map TE.encodeUtf8
+    `fuseUpstream` sinkHandle handle
 
 inputRecorder :: MonadIO m => ConduitT i i m [(UTCTime, i)]
 inputRecorder = go []

@@ -46,16 +46,16 @@ data ASCIInemaCommand
 
 instance HasCodec ASCIInemaCommand where
   codec =
-    dimapCodec f g $
-      eitherCodec
+    dimapCodec f g
+      $ eitherCodec
         (object "Wait" $ requiredField "wait" "How long to wait (in milliseconds)")
-        $ eitherCodec
-          (object "SendInput" $ requiredField "send" "The input to send")
-          ( object "Type" $
-              (,)
-                <$> requiredField "type" "The input to send" .= fst
-                <*> optionalFieldWithDefault "delay" 100 "How long to wait between keystrokes (in milliseconds)" .= snd
-          )
+      $ eitherCodec
+        (object "SendInput" $ requiredField "send" "The input to send")
+        ( object "Type" $
+            (,)
+              <$> requiredField "type" "The input to send" .= fst
+              <*> optionalFieldWithDefault "delay" 100 "How long to wait between keystrokes (in milliseconds)" .= snd
+        )
     where
       f = \case
         Left w -> Wait w

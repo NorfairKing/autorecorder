@@ -1,4 +1,4 @@
-resolver: lts-19.6
+resolver: lts-20.23
 packages:
 - autorecorder
 extra-deps:
@@ -6,62 +6,6 @@ extra-deps:
   commit: 69e8ae036b047fae105c1fe990e175a7572a3eba
   subdirs:
     - dirforest
-
-- github: NorfairKing/autodocodec
-  commit: 38bd4865ff2dd40d342141b7fde9319f835d98c6
-  subdirs:
-    - autodocodec
-    - autodocodec-schema
-    - autodocodec-yaml
-
-- github: NorfairKing/safe-coloured-text
-  commit: 71c5940a3b84eeb498304d8e584e7638f875d51b
-  subdirs:
-    - safe-coloured-text
-    - safe-coloured-text-terminfo
-
-- github: NorfairKing/validity
-  commit: 160e846cc5de8e92e6758172da341f5d81fe0374
-  subdirs:
-    - genvalidity
-    - genvalidity-aeson
-    - genvalidity-bytestring
-    - genvalidity-containers
-    - genvalidity-criterion
-    - genvalidity-hspec
-    - genvalidity-hspec-aeson
-    - genvalidity-hspec-binary
-    - genvalidity-hspec-cereal
-    - genvalidity-hspec-hashable
-    - genvalidity-hspec-optics
-    - genvalidity-hspec-persistent
-    - genvalidity-path
-    - genvalidity-persistent
-    - genvalidity-property
-    - genvalidity-scientific
-    - genvalidity-sydtest
-    - genvalidity-sydtest-aeson
-    - genvalidity-sydtest-hashable
-    - genvalidity-sydtest-lens
-    - genvalidity-sydtest-persistent
-    - genvalidity-text
-    - genvalidity-time
-    - genvalidity-unordered-containers
-    - genvalidity-uuid
-    - genvalidity-vector
-    - validity
-    - validity-aeson
-    - validity-bytestring
-    - validity-containers
-    - validity-path
-    - validity-persistent
-    - validity-primitive
-    - validity-scientific
-    - validity-text
-    - validity-time
-    - validity-unordered-containers
-    - validity-uuid
-    - validity-vector
 
 - normaldistribution-1.1.0.3@sha256:2615b784c4112cbf6ffa0e2b55b76790290a9b9dff18a05d8c89aa374b213477,2160
 
