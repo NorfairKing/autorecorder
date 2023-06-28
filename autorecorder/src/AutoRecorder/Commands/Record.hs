@@ -142,7 +142,7 @@ runASCIInema rs@Settings {..} specFilePath spec@ASCIInemaSpec {..} = do
                       [SendInput "exit\r" | isNothing asciinemaCommand],
                       [Wait 500]
                     ]
-            let inSender = runConduit $ inputWriter specFilePath settingOutputView settingSpeed settingMistakes tAttributes tMasterHandle commands
+            let inSender = runConduit $ inputWriter specFilePath settingOutputView settingSpeed settingMistakes tAttributes tMasterHandle outVar commands
             let outReader = runConduit $ outputConduit settingOutputView outVar tMasterHandle
             mExitedNormally <-
               timeout (asciinemaTimeout * 1000 * 1000) $

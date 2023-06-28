@@ -7,6 +7,7 @@ import AutoRecorder.Output
 import AutoRecorder.Spec
 import Conduit
 import Control.Concurrent (threadDelay)
+import Control.Concurrent.STM
 import Control.Monad
 import Data.Char as Char
 import qualified Data.Conduit.Combinators as C
@@ -23,6 +24,7 @@ import System.IO
 import System.Posix.Terminal
 import System.Random
 import Text.Printf
+import Text.Regex.Posix
 
 type Speed = Double
 
@@ -31,17 +33,17 @@ data Mistakes
   | MistakesWithProbability Double
   deriving (Show, Eq)
 
-inputWriter :: MonadIO m => Path Abs File -> OutputView -> Speed -> Mistakes -> TerminalAttributes -> Handle -> [ASCIInemaCommand] -> ConduitT () void m [(UTCTime, Text)]
-inputWriter specFile ov speed mistakes attrs handle commands =
+inputWriter :: MonadIO m => Path Abs File -> OutputView -> Speed -> Mistakes -> TerminalAttributes -> Handle -> _ -> [ASCIInemaCommand] -> ConduitT () void m [(UTCTime, Text)]
+inputWriter specFile ov speed mistakes attrs writeHandle outVarRef commands =
   ( \ic -> case ov of
       DebugOutputView -> sourceList commands .| ic .| inputDebugConduit
       ProgressOutputView -> inputListProgressConduit specFile commands .| ic
       _ -> sourceList commands .| ic
   )
-    (inputConduit speed mistakes attrs)
+    (inputConduit speed mistakes attrs outVarRef)
     .| inputRecorder
     `fuseUpstream` C.map TE.encodeUtf8
-    `fuseUpstream` sinkHandle handle
+    `fuseUpstream` sinkHandle writeHandle
 
 inputRecorder :: MonadIO m => ConduitT i i m [(UTCTime, i)]
 inputRecorder = go []
@@ -76,14 +78,27 @@ inputListProgressConduit specFile as = foldM_ go 0 as
       unless (currentTiming == newTiming) $ liftIO $ putStrLn $ progressStr newTiming
       pure newTiming
 
-inputConduit :: MonadIO m => Speed -> Mistakes -> TerminalAttributes -> ConduitT ASCIInemaCommand Text m ()
-inputConduit speed mistakes attrs = awaitForever go
+inputConduit :: MonadIO m => Speed -> Mistakes -> TerminalAttributes -> _ -> ConduitT ASCIInemaCommand Text m ()
+inputConduit speed mistakes attrs outVar = awaitForever go
   where
     go :: MonadIO m => ASCIInemaCommand -> ConduitT ASCIInemaCommand Text m ()
     go = \case
       Wait i -> liftIO $ waitMilliSeconds speed i
+      -- WaitForOutput x -> return ()
+      WaitForOutput x -> liftIO $ awaitOutput $ makeRegex x
       SendInput s -> yield $ T.pack $ map mapChar s
       Type s i -> typeString s i
+    awaitOutput :: Regex -> IO ()
+    awaitOutput expectedRegex = do
+      (_, lastLineBS):_ <- readTVarIO outVar
+      let line = T.unpack $ TE.decodeUtf8 lastLineBS
+      if matchTest expectedRegex line
+      then do
+        putStrLn $ "Matching"
+        return ()
+      else do
+        threadDelay 2
+        awaitOutput expectedRegex
     mapChar :: Char -> Char
     mapChar c = case c of
       '\n' -> fromMaybe c $ controlChar attrs EndOfLine

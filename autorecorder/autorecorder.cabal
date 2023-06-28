@@ -47,6 +47,7 @@ library
       cbits/window_size.c
   build-depends:
       aeson
+    , regex-posix
     , async
     , autodocodec
     , autodocodec-yaml
@@ -69,6 +70,7 @@ library
     , unliftio
     , yaml
   default-language: Haskell2010
+  default-extensions: PartialTypeSignatures
 
 executable autorecorder
   main-is: Main.hs
