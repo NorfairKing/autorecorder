@@ -40,6 +40,7 @@ instance HasCodec ASCIInemaSpec where
 
 data ASCIInemaCommand
   = Wait Word -- Milliseconds
+  | WaitForOutput String -- TODO: regexp
   | SendInput String
   | Type String Word -- Milliseconds
   deriving (Show, Eq)
@@ -50,6 +51,8 @@ instance HasCodec ASCIInemaCommand where
       $ eitherCodec
         (object "Wait" $ requiredField "wait" "How long to wait (in milliseconds)")
       $ eitherCodec
+        (object "WaitForOutput" $ requiredField "waitForOutput" "TODO")
+      $ eitherCodec
         (object "SendInput" $ requiredField "send" "The input to send")
         ( object "Type" $
             (,)
@@ -59,12 +62,14 @@ instance HasCodec ASCIInemaCommand where
     where
       f = \case
         Left w -> Wait w
-        Right (Left s) -> SendInput s
-        Right (Right (s, w)) -> Type s w
+        Right (Left s) -> WaitForOutput s
+        Right (Right (Left s)) -> SendInput s
+        Right (Right (Right (s, w))) -> Type s w
       g = \case
         Wait w -> Left w
-        SendInput s -> Right (Left s)
-        Type s w -> Right (Right (s, w))
+        WaitForOutput s -> Right (Left s)
+        SendInput s -> Right (Right (Left s))
+        Type s w -> Right (Right (Right (s, w)))
 
 commandDelay :: ASCIInemaCommand -> Word
 commandDelay = \case

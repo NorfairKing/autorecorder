@@ -3,6 +3,7 @@
 module AutoRecorder.Output where
 
 import Conduit
+import Control.Concurrent (threadDelay)
 import Control.Concurrent.STM
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as SB
@@ -29,7 +30,9 @@ outputConduit ov outVar h =
     .| outputSink outVar
 
 outputSink :: MonadIO m => TVar [(UTCTime, ByteString)] -> ConduitT (UTCTime, ByteString) void m ()
-outputSink outVar = awaitForever $ \t -> liftIO $ atomically $ modifyTVar' outVar (t :)
+outputSink outVar = awaitForever $ \t -> liftIO $ do
+  atomically $ modifyTVar' outVar (t :)
+  threadDelay 10
 
 outputTimerConduit :: MonadIO m => ConduitT i (UTCTime, i) m ()
 outputTimerConduit = C.mapM $ \i -> (,) <$> liftIO getCurrentTime <*> pure i
