@@ -14,6 +14,10 @@ copyright:      Copyright (c) 2022 Tom Sydney Kerckhove
 license:        MIT
 build-type:     Simple
 
+extra-source-files:
+    cbits/window_size.h
+    cbits/window_size.c
+
 source-repository head
   type: git
   location: https://github.com/NorfairKing/autorecorder
@@ -35,8 +39,11 @@ library
       Paths_autorecorder
   hs-source-dirs:
       src
-  c-sources:
+  include-dirs:
+      cbits
+  includes:
       cbits/window_size.h
+  c-sources:
       cbits/window_size.c
   build-depends:
       aeson
