@@ -1,13 +1,6 @@
-resolver: lts-20.23
+resolver: lts-23.19
 packages:
 - autorecorder
-extra-deps:
-- github: NorfairKing/dirforest
-  commit: 69e8ae036b047fae105c1fe990e175a7572a3eba
-  subdirs:
-    - dirforest
-
-- normaldistribution-1.1.0.3@sha256:2615b784c4112cbf6ffa0e2b55b76790290a9b9dff18a05d8c89aa374b213477,2160
 
 system-ghc: true
 nix:

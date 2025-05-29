@@ -31,7 +31,7 @@ data Mistakes
   | MistakesWithProbability Double
   deriving (Show, Eq)
 
-inputWriter :: MonadIO m => Path Abs File -> OutputView -> Speed -> Mistakes -> TerminalAttributes -> Handle -> [ASCIInemaCommand] -> ConduitT () void m [(UTCTime, Text)]
+inputWriter :: (MonadIO m) => Path Abs File -> OutputView -> Speed -> Mistakes -> TerminalAttributes -> Handle -> [ASCIInemaCommand] -> ConduitT () void m [(UTCTime, Text)]
 inputWriter specFile ov speed mistakes attrs handle commands =
   ( \ic -> case ov of
       DebugOutputView -> sourceList commands .| ic .| inputDebugConduit
@@ -43,7 +43,7 @@ inputWriter specFile ov speed mistakes attrs handle commands =
     `fuseUpstream` C.map TE.encodeUtf8
     `fuseUpstream` sinkHandle handle
 
-inputRecorder :: MonadIO m => ConduitT i i m [(UTCTime, i)]
+inputRecorder :: (MonadIO m) => ConduitT i i m [(UTCTime, i)]
 inputRecorder = go []
   where
     go acc = do
@@ -55,12 +55,12 @@ inputRecorder = go []
           yield i
           go $ (now, i) : acc
 
-inputDebugConduit :: MonadIO m => ConduitT Text Text m ()
+inputDebugConduit :: (MonadIO m) => ConduitT Text Text m ()
 inputDebugConduit = C.mapM $ \t -> do
   liftIO $ T.putStrLn $ "Sending input: " <> T.pack (show t)
   pure t
 
-inputListProgressConduit :: MonadIO m => Path Abs File -> [ASCIInemaCommand] -> ConduitT i ASCIInemaCommand m ()
+inputListProgressConduit :: (MonadIO m) => Path Abs File -> [ASCIInemaCommand] -> ConduitT i ASCIInemaCommand m ()
 inputListProgressConduit specFile as = foldM_ go 0 as
   where
     totalDelay = sum $ map commandDelay as
@@ -69,17 +69,17 @@ inputListProgressConduit specFile as = foldM_ go 0 as
     showIntWithLen :: Word -> String
     showIntWithLen w = printf ("%" <> show lenStrLen <> "d") (adjust w)
     progressStr i = concat ["Casting ", fromAbsFile specFile, ": [", showIntWithLen i, "/", showIntWithLen totalDelay, "]"]
-    go :: MonadIO m => Word -> ASCIInemaCommand -> ConduitT i ASCIInemaCommand m Word
+    go :: (MonadIO m) => Word -> ASCIInemaCommand -> ConduitT i ASCIInemaCommand m Word
     go currentTiming c = do
       yield c
       let newTiming = currentTiming + commandDelay c
       unless (currentTiming == newTiming) $ liftIO $ putStrLn $ progressStr newTiming
       pure newTiming
 
-inputConduit :: MonadIO m => Speed -> Mistakes -> TerminalAttributes -> ConduitT ASCIInemaCommand Text m ()
+inputConduit :: (MonadIO m) => Speed -> Mistakes -> TerminalAttributes -> ConduitT ASCIInemaCommand Text m ()
 inputConduit speed mistakes attrs = awaitForever go
   where
-    go :: MonadIO m => ASCIInemaCommand -> ConduitT ASCIInemaCommand Text m ()
+    go :: (MonadIO m) => ASCIInemaCommand -> ConduitT ASCIInemaCommand Text m ()
     go = \case
       Wait i -> liftIO $ waitMilliSeconds speed i
       SendInput s -> yield $ T.pack $ map mapChar s
@@ -105,7 +105,7 @@ inputConduit speed mistakes attrs = awaitForever go
               let accuracy = 1000 :: Int
               randomNum <- randomRIO (0, accuracy)
               pure $ randomNum < round (p * fromIntegral accuracy)
-        makeAMistake :: MonadIO m => Char -> ConduitT ASCIInemaCommand Text m ()
+        makeAMistake :: (MonadIO m) => Char -> ConduitT ASCIInemaCommand Text m ()
         makeAMistake c = do
           let possibleMistakes = validMistakes c
           randomIndex <- liftIO $ randomRIO (0, length possibleMistakes - 1)
@@ -114,7 +114,7 @@ inputConduit speed mistakes attrs = awaitForever go
           go $ SendInput [c']
           waitForChar '\b'
           go $ SendInput ['\b'] -- Backspace
-        waitForChar :: MonadIO m => Char -> ConduitT ASCIInemaCommand Text m ()
+        waitForChar :: (MonadIO m) => Char -> ConduitT ASCIInemaCommand Text m ()
         waitForChar c = do
           randomDelay <- liftIO $ normalIO' (0, 25) -- Add some random delay to make the typing feel more natural
           go $ Wait $ round ((fromIntegral i * charSpeed c) + randomDelay :: Double)

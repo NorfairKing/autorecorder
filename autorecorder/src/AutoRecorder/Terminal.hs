@@ -17,7 +17,7 @@ data Terminal = Terminal
   }
 
 withPseudoTerminal ::
-  MonadUnliftIO m =>
+  (MonadUnliftIO m) =>
   (Terminal -> m b) ->
   m b
 withPseudoTerminal onPseudoTerminal =

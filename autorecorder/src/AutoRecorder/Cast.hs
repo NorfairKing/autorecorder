@@ -54,7 +54,7 @@ instance FromJSON Header where
                 <$> o .: "height"
                 <*> o .: "width"
             )
-        <*> (o .:? "timestamp" >>= traverse (parseTimeM False defaultTimeLocale "%s") . fmap (show :: Int -> String))
+        <*> (o .:? "timestamp" >>= traverse (parseTimeM False defaultTimeLocale "%s" . (show :: Int -> String)))
         <*> o .:? "duration"
         <*> o .:? "idle_time_limit"
         <*> o .:? "command"
