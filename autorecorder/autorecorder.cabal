@@ -35,8 +35,9 @@ library
       Paths_autorecorder
   hs-source-dirs:
       src
+  include-dirs:
+      cbits
   c-sources:
-      cbits/window_size.h
       cbits/window_size.c
   build-depends:
       aeson

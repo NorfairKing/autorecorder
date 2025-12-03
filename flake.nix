@@ -5,7 +5,7 @@
     extra-trusted-public-keys = "autorecorder.cachix.org-1:Im27BJ1dfw5yRVPqEL8ajnmLe7BHCldKEOyOWbtxEKM";
   };
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-25.11";
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
   };
   outputs =

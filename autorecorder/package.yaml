@@ -11,8 +11,9 @@ dependencies:
 
 library:
   source-dirs: src
+  include-dirs: cbits
+  includes: window_size.h
   c-sources:
-    - cbits/window_size.h
     - cbits/window_size.c
   dependencies:
     - aeson
